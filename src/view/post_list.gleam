@@ -67,10 +67,10 @@ pub fn view_items(posts: List(Post)) -> Element(msg) {
 fn view_list_item(post: Post) -> Element(msg) {
   html.li([attribute.class("list-item")], [
     html.a([attribute.class("post-header"), route.href(route.Post(post.slug))], [
-      html.span([attribute.class("title")], view_title(post)),
       html.span([attribute.class("meta")], [
         html.time([attribute.datetime(post.date)], [html.text(post.date)]),
       ]),
+      html.span([attribute.class("title")], view_title(post)),
     ]),
     html.div([attribute.class("post-content")], [html.text(post.description)]),
   ])

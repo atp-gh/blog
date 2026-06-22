@@ -1,3 +1,10 @@
++++
+title = "Deployment"
+date = "2026-01-04"
+description = "Building and deploying arata to GitHub Pages, Cloudflare Pages, or any static host."
+tags = ["docs", "deployment"]
++++
+
 # Deployment
 
 arata builds to a static site in `dist/` that can be deployed to any static host (GitHub Pages, Cloudflare Pages, Netlify, etc.).

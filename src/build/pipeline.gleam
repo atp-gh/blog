@@ -66,9 +66,17 @@ pub fn run() -> Result(Nil, String) {
   // 2. Search index JSON.
   write(dist_dir <> "/search_index.json", search_index_json(posts))
 
-  // 3. Feeds.
-  write(dist_dir <> "/atom.xml", feeds.atom_feed(site_meta, posts))
-  write(dist_dir <> "/rss.xml", feeds.rss_feed(site_meta, posts))
+  // 3. Feeds. Only emit `atom.xml` / `rss.xml` when RSS is enabled in the
+  // site metadata; otherwise the feed files are skipped (and the `<link>`
+  // tags in `index.html` are omitted below). This mirrors blogatto's opt-out
+  // feed model.
+  case site_meta.rss_enabled {
+    True -> {
+      write(dist_dir <> "/atom.xml", feeds.atom_feed(site_meta, posts))
+      write(dist_dir <> "/rss.xml", feeds.rss_feed(site_meta, posts))
+    }
+    False -> Nil
+  }
 
   // 4. Sitemap.
   let page_slugs = list.map(pages, fn(p) { p.slug })
@@ -92,7 +100,10 @@ pub fn run() -> Result(Nil, String) {
   io.println("Build complete. dist/ contains:")
   io.println("  index.html, 404.html, app.mjs, arata.css,")
   io.println("  content_index.json, search_index.json,")
-  io.println("  atom.xml, rss.xml, sitemap.xml,")
+  case site_meta.rss_enabled {
+    True -> io.println("  atom.xml, rss.xml, sitemap.xml,")
+    False -> io.println("  sitemap.xml, (feeds disabled)")
+  }
   io.println("  fonts/, icons/, images/, css/")
 
   Ok(Nil)
@@ -312,7 +323,19 @@ fn search_index_json(posts: List(Post)) -> String {
 /// The custom `index.html` with FOUC prevention: both `light` and `dark`
 /// classes on `<html>`, both theme stylesheets loaded (dark `disabled`), and
 /// the SPA script. The theme FFI toggles the `disabled` attribute at runtime.
+///
+/// Feed `<link rel='alternate'>` tags are only emitted when
+/// `site_meta.rss_enabled` is `True`; the URLs are relative (`./atom.xml`,
+/// `./rss.xml`) so the page works when served from a subdirectory rather than
+/// the domain root.
 fn index_html(site_meta: site.SiteMeta) -> String {
+  let feed_links = case site_meta.rss_enabled {
+    True ->
+      "  <link rel='alternate' type='application/atom+xml' href='./atom.xml'>
+  <link rel='alternate' type='application/rss+xml' href='./rss.xml'>
+"
+    False -> ""
+  }
   "<!DOCTYPE html>
 <html lang='en' class='dark light'>
 <head>
@@ -321,9 +344,7 @@ fn index_html(site_meta: site.SiteMeta) -> String {
   <title>" <> site_meta.title <> "</title>
   <meta name='description' content='" <> site_meta.description <> "'>
   <link rel='icon' type='image/png' href='./icon/favicon.png'>
-  <link rel='alternate' type='application/atom+xml' href='./atom.xml'>
-  <link rel='alternate' type='application/rss+xml' href='./rss.xml'>
-  <link rel='stylesheet' href='./arata.css'>
+" <> feed_links <> "  <link rel='stylesheet' href='./arata.css'>
 </head>
 <body>
   <div id='app'></div>

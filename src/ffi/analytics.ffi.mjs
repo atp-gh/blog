@@ -7,7 +7,6 @@
 // `Analytics` config type:
 //   - GoatCounter: loads the vendored count.js with data-goatcounter.
 //   - Umami: loads the vendored imamu.js with data-website-id.
-//   - Google: loads gtag.js from googletagmanager.com.
 
 export function inject_analytics(provider) {
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -34,20 +33,6 @@ export function inject_analytics(provider) {
       script.setAttribute("data-website-id", provider.website_id);
       script.setAttribute("data-host-url", provider.host_url);
       document.head.appendChild(script);
-      break;
-    }
-    case "google": {
-      const gtag = document.createElement("script");
-      gtag.id = "arata-analytics";
-      gtag.async = true;
-      gtag.src = "https://www.googletagmanager.com/gtag/js?id=" + provider.tracking_id;
-      document.head.appendChild(gtag);
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function () {
-        window.dataLayer.push(arguments);
-      };
-      window.gtag("js", new Date());
-      window.gtag("config", provider.tracking_id);
       break;
     }
     default:

@@ -21,6 +21,7 @@ fn sample_site() -> SiteMeta {
     analytics: AnalyticsDisabled,
     comments: CommentsDisabled,
     fediverse_creator: None,
+    rss_enabled: True,
   )
 }
 

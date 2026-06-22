@@ -1,13 +1,14 @@
 //// Single post view: renders a post's header, meta row, optional tl;dr box,
-//// body, and tags, mirroring apollo's `templates/page.html` template.
+//// and body, mirroring apollo's `templates/page.html` template.
 ////
 //// apollo's page template wraps everything in `<main><article><div
 //// class="title">...</div>...<section class="body">...</section></article></main>`.
-//// arata reproduces the same `.page-header` / `.meta` / `.tldr` / `.body` /
-//// `.post-tags` classes. The meta row carries the publication date, optional
-//// updated date, word count, and reading time — matching apollo's conditional
-//// meta fields. The table of contents is rendered separately in the
-//// `.right-content` sidebar (see `view/toc.gleam`), not inside this view.
+//// arata reproduces the same `.page-header` / `.meta` / `.tldr` / `.body`
+//// classes. The meta row carries the publication date, optional updated date,
+//// word count, and reading time — matching apollo's conditional meta fields.
+//// The post tags and table of contents are rendered separately in the
+//// `.right-content` sidebar (see `arata.gleam`'s `view_tags_and_toc` and
+//// `view/toc.gleam`), not inside this view.
 ////
 //// The post body is pre-rendered HTML from the content pipeline (Phase 17),
 //// so we inject it verbatim with `lustre/element.unsafe_raw_html`. The body
@@ -21,7 +22,6 @@ import gleam/option.{type Option}
 import lustre/attribute
 import lustre/element.{type Element, none, unsafe_raw_html}
 import lustre/element/html
-import route
 import view/comments
 
 /// Render a single post.
@@ -29,18 +29,21 @@ import view/comments
 /// Structure:
 ///   <main>
 ///     <article>
-///       <div class="page-header">{title} [<span class="draft-label">DRAFT</span>]</div>
-///       <div class="meta">Posted on <time>...</time> :: Updated on ... :: N Words :: M Min Read</div>
+///       <div class="title">
+///         <div class="page-header">{title} [<span class="draft-label">DRAFT</span>]</div>
+///         <div class="meta">Posted on <time>...</time> :: Updated on ... :: N Words :: M Min Read</div>
+///       </div>
 ///       <div class="tldr"><strong>tl;dr:</strong> ...</div>     (optional)
 ///       <section class="body">{body HTML verbatim}</section>
-///       <div class="post-tags">...</div>
 ///     </article>
 ///   </main>
 ///
 /// The title uses a `<div>` (not `<h1>`) to match apollo's `page_header`
 /// macro exactly: the global `h1::before { content: "# " }` rule would
 /// otherwise prepend a `#` to the title. The `.page-header` class supplies
-/// the 2.5em header typography.
+/// the 2.5em header typography. The post tags are no longer rendered here —
+/// they live in the `.right-content` sidebar above the TOC (see
+/// `arata.gleam`'s `view_tags_and_toc`).
 pub fn view(post: Post, comments_config: CommentsConfig) -> Element(msg) {
   html.main([], [
     html.article([], [
@@ -50,7 +53,6 @@ pub fn view(post: Post, comments_config: CommentsConfig) -> Element(msg) {
       ]),
       view_tldr(post.tldr),
       unsafe_raw_html("", "section", [attribute.class("body")], post.body),
-      view_tags(post.tags),
     ]),
     comments.view(comments_config, post.slug),
   ])
@@ -119,23 +121,5 @@ fn view_tldr(tldr: Option(String)) -> Element(msg) {
         html.text(text),
       ])
     option.None -> none()
-  }
-}
-
-/// Render the post's tags as a `.post-tags` row. Each tag links to its
-/// taxonomy page via `route.href(route.Tag(tag))` so modem intercepts the
-/// click. Returns `element.none()` when the post has no tags.
-fn view_tags(tags: List(String)) -> Element(msg) {
-  case tags {
-    [] -> none()
-    _ ->
-      html.div(
-        [attribute.class("post-tags")],
-        list.map(tags, fn(tag) {
-          html.a([attribute.class("tag"), route.href(route.Tag(tag))], [
-            html.text(tag),
-          ])
-        }),
-      )
   }
 }

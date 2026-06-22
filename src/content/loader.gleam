@@ -192,7 +192,7 @@ fn load_post(path: String, filename: String) -> Result(Post, Nil) {
     Ok(t) -> Some(t)
     Error(_) -> None
   }
-  let html_body = markdown.to_html(body)
+  let html_body = markdown.to_html(body) |> add_heading_ids
   let toc = extract_toc(body)
   let word_count = count_words(body)
   let reading_time = case word_count {
@@ -253,25 +253,106 @@ fn extract_toc(markdown: String) -> List(TocEntry) {
   |> string.split("\n")
   |> list.filter(fn(line) { string.starts_with(line, "## ") })
   |> list.map(fn(line) {
-    let title = string.replace(line, "## ", "")
+    let title =
+      line
+      |> string.drop_start(up_to: 3)
+      |> string.trim()
     let id = slugify(title)
     TocEntry(id: id, title: title, children: [])
   })
 }
 
-/// Convert a heading title to a URL-safe slug.
+/// Convert a heading title to a URL-safe slug. Matches the algorithm used by
+/// `add_heading_ids` so the TOC entry's `id` is identical to the `id`
+/// attribute mork's HTML output is post-processed to carry: lowercase the
+/// text, keep alphanumerics, convert spaces/dashes/underscores to `-`, and
+/// drop every other character (punctuation, backticks, slashes, etc.). This
+/// makes headings like `## Site metadata (\`data/site.gleam\`)` (markdown)
+/// and `<h2>Site metadata (<code>data/site.gleam</code>)</h2>` (HTML, after
+/// stripping the `<code>` tags) slugify to the same `site-metadata-datasitegleam`.
 fn slugify(text: String) -> String {
   text
   |> string.lowercase()
-  |> string.replace(" ", "-")
-  |> string.replace("'", "")
-  |> string.replace(".", "")
-  |> string.replace(",", "")
-  |> string.replace(":", "")
-  |> string.replace("?", "")
-  |> string.replace("!", "")
-  |> string.replace("(", "")
-  |> string.replace(")", "")
+  |> string.to_graphemes()
+  |> list.fold("", fn(acc, ch) {
+    case string.contains("abcdefghijklmnopqrstuvwxyz0123456789", ch) {
+      True -> acc <> ch
+      False ->
+        case ch {
+          " " | "-" | "_" -> acc <> "-"
+          _ -> acc
+        }
+    }
+  })
+}
+
+/// Strip HTML tags from a fragment of HTML by dropping everything between
+/// `<` and `>` (inclusive). Used by `add_heading_ids` to extract plain text
+/// from heading content that mork may have wrapped in inline tags like
+/// `<code>` or `<a>`. HTML entities (e.g. `&lt;`) are left untouched.
+fn strip_html_tags(html: String) -> String {
+  html
+  |> string.split("<")
+  |> list.map(fn(piece) {
+    case string.split_once(piece, ">") {
+      Ok(#(_tag, rest)) -> rest
+      Error(_) -> piece
+    }
+  })
+  |> string.join("")
+}
+
+/// Post-process mork's HTML output to inject `id` attributes on `<h1>`–`<h6>`
+/// heading tags. mork only emits `id`s when its `heading_ids` option is
+/// enabled (and arata leaves it off), so we add them ourselves at load time.
+/// The id is the slugified plain-text content of the heading (after stripping
+/// any nested inline tags), matching `extract_toc`'s slugify so the TOC's
+/// `#id` anchors resolve to the right heading.
+///
+/// The parser is intentionally simple: it splits the HTML on `<h`, then for
+/// each piece starting with `1>`–`6>` (i.e. an `<hN>` opening tag with no
+/// attributes — mork's default output), it extracts the heading text up to
+/// the matching `</h`, slugifies the stripped text, and rebuilds the tag as
+/// `<hN id="slug">…</hN>`. Pieces that don't start with a heading level
+/// (e.g. `<header>`, `<hr />`) are left untouched.
+fn add_heading_ids(html: String) -> String {
+  let pieces = string.split(html, "<h")
+  case pieces {
+    [] -> html
+    [first, ..rest] -> {
+      let processed = list.map(rest, add_id_to_heading_piece)
+      string.join([first, ..processed], "<h")
+    }
+  }
+}
+
+/// Process one piece produced by splitting HTML on `<h`. A heading piece
+/// looks like `2>Title</h2>\n…`; a non-heading piece (e.g. from `<header>`)
+/// looks like `eader>…</header>…`. We only rewrite the former.
+fn add_id_to_heading_piece(piece: String) -> String {
+  let levels = ["1>", "2>", "3>", "4>", "5>", "6>"]
+  let is_heading = list.any(levels, fn(lv) { string.starts_with(piece, lv) })
+  case is_heading {
+    False -> piece
+    True ->
+      case string.split_once(piece, ">") {
+        Ok(#(opening, rest)) ->
+          case string.split_once(rest, "</h") {
+            Ok(#(title, after_close)) -> {
+              let slug = title |> strip_html_tags |> slugify
+              opening
+              <> " id=\""
+              <> slug
+              <> "\">"
+              <> title
+              <> "</h"
+              <> after_close
+            }
+            Error(_) -> piece
+          }
+        Error(_) -> piece
+      }
+  }
 }
 
 /// Count words in a markdown string (rough estimate).

@@ -38,10 +38,15 @@ pub fn view(
     html.div(
       [attribute.class("right-nav")],
       // Menu items (internal links) followed by the search button (wired via
-      // on_open_search) and the theme toggle (wired via on_toggle_theme).
-      list.append(view_menu(config.menu, current_route), [
-        view_search_button(on_open_search),
-        view_theme_toggle(on_toggle_theme),
+      // on_open_search, omitted when `config.search_enabled` is `False`) and
+      // the theme toggle (wired via on_toggle_theme).
+      list.flatten([
+        view_menu(config.menu, current_route),
+        case config.search_enabled {
+          True -> [view_search_button(on_open_search)]
+          False -> []
+        },
+        [view_theme_toggle(on_toggle_theme)],
       ]),
     ),
   ])

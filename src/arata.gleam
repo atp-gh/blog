@@ -46,7 +46,6 @@ import route.{
   type Route, Home, Links, NotFound, Page, Post, Posts, Projects, Tag, Tags,
 }
 import view/cards
-import view/footer
 import view/header
 import view/home as home_view
 import view/layout
@@ -152,12 +151,13 @@ fn init(_flags: Nil) -> #(Model, effect.Effect(Msg)) {
     modem.init(fn(uri) { uri |> route.parse_route |> UserNavigatedTo })
   let post_effects = post_effects_for(initial_route, False)
   let theme_init = effect.map(theme_effect.init_theme(), theme_msg_to_msg)
-  let search_keys =
-    effect.map(search_effect.subscribe_to_search_keys(), SearchKeyPressed)
+  let search_keys = case model.config.search_enabled {
+    True ->
+      effect.map(search_effect.subscribe_to_search_keys(), SearchKeyPressed)
+    False -> effect.none()
+  }
   let analytics_eff =
-    effect.map(analytics_effect.inject(model.site_meta.analytics), fn(_) {
-      NoOp
-    })
+    effect.map(analytics_effect.inject(model.config.analytics), fn(_) { NoOp })
   // Kick off the async fetch of `content_index.json`. The result arrives as
   // a `ContentLoaded` message that populates `posts`, `pages`, `homepage`.
   let content_eff = effect.map(content_runtime.load(), content_msg_to_msg)
@@ -505,7 +505,7 @@ fn view(model: Model) -> Element(Msg) {
       case post.find_by_slug(model.posts, slug) {
         Ok(found) -> #(
           post_view.view(found, model.site_meta.comments),
-          toc_view.view(found.toc, model.active_heading),
+          view_tags_and_toc(found.tags, found.toc, model.active_heading),
         )
         Error(Nil) -> #(view_not_found(), none())
       }
@@ -526,34 +526,63 @@ fn view(model: Model) -> Element(Msg) {
   }
 
   // The search modal is rendered as a sibling of the layout (it's a
-  // fixed-position overlay, not part of the normal document flow).
-  html.div([], [
-    layout.view(
+  // fixed-position overlay, not part of the normal document flow). When
+  // search is disabled in the config, the modal is omitted entirely.
+  let search_modal_el = case model.config.search_enabled {
+    True ->
+      search_modal.view(
+        model.search.open,
+        model.search.query,
+        model.search.results,
+        model.search.selected_index,
+        UserEnteredSearchQuery,
+        UserClearedSearch,
+        UserClosedSearch,
+        SearchResultClicked,
+        fn(key) {
+          SearchKeyPressed(search_effect.SearchKeyEvent(
+            key:,
+            cmd_or_ctrl: False,
+          ))
+        },
+      )
+    False -> none()
+  }
+  // An inline `<style>` rule that overrides the `:root` font CSS custom
+  // properties with the values from `config.fonts`. The rest of `arata.css`
+  // resolves the font families through `var(--text-font)` etc., so this is
+  // the single seam where the configured fonts take effect.
+  let fonts_style =
+    html.style(
+      [],
+      ":root { --text-font: "
+        <> model.config.fonts.text
+        <> "; --header-font: "
+        <> model.config.fonts.header
+        <> "; --code-font: "
+        <> model.config.fonts.code
+        <> "; }",
+    )
+  html.div(
+    [],
+    list.append(
       [
-        header.view(
-          model.config,
-          model.route,
-          event.on_click(UserToggledTheme),
-          event.on_click(UserOpenedSearch),
+        layout.view(
+          list.append([fonts_style], [
+            header.view(
+              model.config,
+              model.route,
+              event.on_click(UserToggledTheme),
+              event.on_click(UserOpenedSearch),
+            ),
+            main_content,
+          ]),
+          right_content,
         ),
-        main_content,
-        footer.view(model.config),
       ],
-      right_content,
+      [search_modal_el],
     ),
-    search_modal.view(
-      model.search.open,
-      model.search.query,
-      model.search.results,
-      model.search.selected_index,
-      UserEnteredSearchQuery,
-      UserClearedSearch,
-      SearchResultClicked,
-      fn(key) {
-        SearchKeyPressed(search_effect.SearchKeyEvent(key:, cmd_or_ctrl: False))
-      },
-    ),
-  ])
+  )
 }
 
 // All routes are now fully wired — no placeholder views remain.
@@ -565,4 +594,44 @@ fn view_not_found() -> Element(Msg) {
     html.div([attribute.class("page-header")], [html.text("404")]),
     html.span([], [html.text("Page not found :(")]),
   ])
+}
+
+/// Render the right sidebar for a single post: the post's tags (as a
+/// `.post-tags` row of links to `/tags/<tag>`) followed by the table of
+/// contents. Tags appear ABOVE the TOC with spacing between them and the
+/// TOC below (see `.right-content .post-tags` in `arata.css`). When the
+/// post has no tags AND no TOC entries, returns `element.none()` so the
+/// sidebar stays empty.
+fn view_tags_and_toc(
+  post_tags: List(String),
+  toc: List(post.TocEntry),
+  active_heading: Option(String),
+) -> Element(Msg) {
+  case post_tags, toc {
+    [], [] -> none()
+    _, _ ->
+      html.div([], [
+        view_tags_sidebar(post_tags),
+        toc_view.view(toc, active_heading),
+      ])
+  }
+}
+
+/// Render the post's tags as a `.post-tags` row for the right sidebar. Each
+/// tag is a link to its taxonomy page via `route.href(route.Tag(tag))` so
+/// modem intercepts the click. Returns `element.none()` when the post has
+/// no tags, so the sidebar collapses cleanly.
+fn view_tags_sidebar(post_tags: List(String)) -> Element(Msg) {
+  case post_tags {
+    [] -> none()
+    _ ->
+      html.div(
+        [attribute.class("post-tags")],
+        list.map(post_tags, fn(tag) {
+          html.a([attribute.class("tag"), route.href(route.Tag(tag))], [
+            html.text(tag),
+          ])
+        }),
+      )
+  }
 }

@@ -21,6 +21,11 @@ import lustre/element/html
 import lustre/event
 
 /// Render the search modal. Returns `element.none()` when `open` is `False`.
+///
+/// `on_close` is dispatched when the user clicks the backdrop overlay (the area
+/// outside `#modal-content`). The backdrop is a separate sibling element behind
+/// `#modal-content`, so clicks on the dialog body don't bubble up to the
+/// backdrop's onclick handler — only clicks on the dimmed area close the modal.
 pub fn view(
   open: Bool,
   query: String,
@@ -28,6 +33,7 @@ pub fn view(
   selected_index: Int,
   on_input_change: fn(String) -> msg,
   on_clear: msg,
+  on_close: msg,
   on_result_click: fn(String) -> msg,
   on_keydown: fn(String) -> msg,
 ) -> Element(msg) {
@@ -42,6 +48,14 @@ pub fn view(
           attribute.attribute("aria-labelledby", "modalTitle"),
         ],
         [
+          // The clickable backdrop: covers the full viewport, sits behind the
+          // dialog. Only clicks landing here (i.e. outside `#modal-content`)
+          // fire `on_close` — `#modal-content` is a sibling, not a child, so
+          // its clicks don't bubble to this handler.
+          html.div(
+            [attribute.class("search-backdrop"), event.on_click(on_close)],
+            [],
+          ),
           html.div([attribute.id("modal-content")], [
             html.h1(
               [attribute.id("modalTitle"), attribute.class("page-header")],

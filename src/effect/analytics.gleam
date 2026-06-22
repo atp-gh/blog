@@ -7,7 +7,6 @@
 //// selected by the `data/site.Analytics` config type:
 ////   - GoatCounter: loads `/js/count.js` with `data-goatcounter`.
 ////   - Umami: loads `/js/imamu.js` with `data-website-id`.
-////   - Google: loads `gtag.js` from googletagmanager.com.
 ////
 //// The FFI lives in `src/ffi/analytics.ffi.mjs`. The `@external` declaration
 //// has a no-op Gleam fallback so the project builds on Erlang.

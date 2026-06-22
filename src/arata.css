@@ -113,7 +113,7 @@
 
 :root {
   /* Fonts */
-  --font-size-base: 16px;
+  --font-size-base: 17px;
   --mono-text-font: "Jetbrains Mono";
   --text-font: "ZedTextFtl";
   --header-font: "ZedDisplayFtl", "Space Grotesk", "Helvetica", sans-serif;
@@ -539,27 +539,29 @@ time {
 
 .post-list .list-item,
 .tag-list .list-item {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
   list-style-type: none;
 }
 
 .post-list .post-header,
 .tag-list .post-header {
-  display: grid;
-  align-items: center;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 1rem;
 }
 
 @media all and (max-width: 640px) {
   .post-list .post-header,
   .tag-list .post-header {
-    grid-template-rows: auto 1fr;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 
 @media all and (min-width: 640px) {
   .post-list .post-header,
   .tag-list .post-header {
-    grid-template-columns: auto 1fr;
     gap: 1rem;
   }
 }
@@ -1884,6 +1886,22 @@ pre.giallo code {
 
 .toc .parent > a {
   color: var(--text-0);
+}
+
+/* Post tags in the right sidebar (above the TOC). The `.post-tags` row is a
+   flex-wrap container so tags flow onto multiple lines if needed, with a
+   consistent `gap` for spacing. `margin-bottom` separates the tag row from
+   the TOC below. Tags themselves are simple `<a class="tag">` links to
+   `/tags/<tag>`. */
+.right-content .post-tags {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.right-content .post-tags .tag {
+  display: inline-block;
 }
 
 /* =========================================================================

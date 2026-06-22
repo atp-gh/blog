@@ -12,7 +12,6 @@ import gleam/option.{type Option, None}
 pub type Analytics {
   GoatCounter(user: String, host: String)
   Umami(website_id: String, host_url: String)
-  Google(tracking_id: String)
   AnalyticsDisabled
 }
 
@@ -34,6 +33,11 @@ pub type SiteMeta {
     analytics: Analytics,
     comments: CommentsConfig,
     fediverse_creator: Option(String),
+    /// Whether to emit RSS/Atom feeds during the build. When `False`, the
+    /// pipeline skips writing `dist/atom.xml` and `dist/rss.xml` and omits the
+    /// feed `<link>` tags from `index.html`. Defaults to `True`. The pipeline
+    /// reads this field because it operates on `SiteMeta`, not `config.Config`.
+    rss_enabled: Bool,
   )
 }
 
@@ -46,5 +50,6 @@ pub fn default() -> SiteMeta {
     analytics: AnalyticsDisabled,
     comments: CommentsDisabled,
     fediverse_creator: None,
+    rss_enabled: True,
   )
 }

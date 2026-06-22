@@ -1,6 +1,13 @@
++++
+title = "Shortcode Reference"
+date = "2026-01-03"
+description = "Reference for the note, character, image, and mermaid shortcodes available in arata posts."
+tags = ["docs", "shortcodes"]
++++
+
 # Shortcode Reference
 
-arata supports four shortcodes, mirroring apollo's `templates/shortcodes/`. In the current implementation, shortcodes are Gleam functions in `src/shortcodes/` that return HTML strings for embedding in post bodies. The future markdown pipeline (Phase 17) will expand `{{ note(...) }}`-style syntax by calling these functions.
+arata supports four shortcodes, mirroring apollo's `templates/shortcodes/`. In the current implementation, shortcodes are Gleam functions in `src/shortcodes/` that return HTML strings for embedding in post bodies. The markdown pipeline expands `{{ note(...) }}`-style syntax by calling these functions.
 
 ## note
 
@@ -63,7 +70,7 @@ image.view("/images/photo.png", "Alt text", 800, 600, "lazy", "async")
 | `loading` | String | `"lazy"` (default) or `"eager"`. |
 | `decoding` | String | `"async"` (default) or `"sync"`. |
 
-Image resizing (avif/webp derivatives) is deferred to the build pipeline (Phase 17).
+Image resizing (avif/webp derivatives) is deferred to the build pipeline.
 
 ## mermaid
 
