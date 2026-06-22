@@ -36,9 +36,6 @@ const css_src = "src/arata.css"
 /// The static assets directory.
 const static_dir = "static"
 
-/// The compiled JavaScript entry point (produced by `gleam build`).
-const js_entry = "build/dev/javascript/arata/arata.mjs"
-
 /// Run the full build pipeline.
 pub fn main() -> Nil {
   let assert Ok(_) = run()
@@ -138,9 +135,26 @@ fn copy_directory_contents(src: String, dest: String) -> Nil {
 /// Compile the Gleam JavaScript and bundle it into `dist/app.mjs` using
 /// `bun build`. This replaces `lustre/dev build` (which requires Erlang/OTP).
 /// `gleam build` must have already run (it does as part of `gleam run`).
+///
+/// The Gleam entry module (`arata.mjs`) exports `main()` but does not call it
+/// (Gleam only auto-calls `main` on the Erlang target). `lustre_dev_tools`
+/// works around this by generating a small entry shim that imports and calls
+/// `main()`. We do the same: write a temporary `entry.mjs` that imports
+/// `main` from the compiled `arata.mjs` and invokes it, then bundle that.
 fn bundle_spa() -> Nil {
+  // Write the entry shim that calls main(). The shim lives alongside
+  // arata.mjs in build/dev/javascript/arata/, so the import is relative
+  // to that directory: "./arata.mjs".
+  let shim = "import { main } from \"./arata.mjs\"; main();"
+  let shim_path = "build/dev/javascript/arata/entry.mjs"
+  let _ = simplifile.write(shim_path, shim)
+
   let cmd =
-    "bun build " <> js_entry <> " --outfile " <> dist_dir <> "/app.mjs --minify"
+    "bun build "
+    <> shim_path
+    <> " --outfile "
+    <> dist_dir
+    <> "/app.mjs --minify"
   case run_command(cmd) {
     0 -> Nil
     code -> {
@@ -259,14 +273,14 @@ fn index_html(site_meta: site.SiteMeta) -> String {
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <title>" <> site_meta.title <> "</title>
   <meta name='description' content='" <> site_meta.description <> "'>
-  <link rel='icon' type='image/png' href='/icon/favicon.png'>
-  <link rel='alternate' type='application/atom+xml' href='/atom.xml'>
-  <link rel='alternate' type='application/rss+xml' href='/rss.xml'>
-  <link rel='stylesheet' href='/arata.css'>
+  <link rel='icon' type='image/png' href='./icon/favicon.png'>
+  <link rel='alternate' type='application/atom+xml' href='./atom.xml'>
+  <link rel='alternate' type='application/rss+xml' href='./rss.xml'>
+  <link rel='stylesheet' href='./arata.css'>
 </head>
 <body>
   <div id='app'></div>
-  <script type='module' src='/app.mjs'></script>
+  <script type='module' src='./app.mjs'></script>
 </body>
 </html>"
 }
