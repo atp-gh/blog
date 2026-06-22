@@ -21,7 +21,9 @@ import data/post.{type Post}
 import data/project.{type Project}
 import data/sample_content
 import data/search.{type SearchResult}
+import data/site.{type SiteMeta}
 import data/talk.{type Talk}
+import effect/analytics as analytics_effect
 import effect/codeblock as codeblock_effect
 import effect/note as note_effect
 import effect/script as script_effect
@@ -75,6 +77,7 @@ pub type Model {
   Model(
     route: Route,
     config: config.Config,
+    site_meta: SiteMeta,
     posts: List(Post),
     projects: List(Project),
     talks: List(Talk),
@@ -113,6 +116,7 @@ fn init(_flags: Nil) -> #(Model, effect.Effect(Msg)) {
     Model(
       route: initial_route,
       config: config.default(),
+      site_meta: site.default(),
       posts: sample_content.posts(),
       projects: sample_content.projects(),
       talks: sample_content.talks(),
@@ -140,8 +144,18 @@ fn init(_flags: Nil) -> #(Model, effect.Effect(Msg)) {
   let theme_init = effect.map(theme_effect.init_theme(), theme_msg_to_msg)
   let search_keys =
     effect.map(search_effect.subscribe_to_search_keys(), SearchKeyPressed)
+  let analytics_eff =
+    effect.map(analytics_effect.inject(model.site_meta.analytics), fn(_) {
+      NoOp
+    })
   let effects =
-    effect.batch([nav_effect, post_effects, theme_init, search_keys])
+    effect.batch([
+      nav_effect,
+      post_effects,
+      theme_init,
+      search_keys,
+      analytics_eff,
+    ])
 
   #(model, effects)
 }
@@ -444,7 +458,7 @@ fn view(model: Model) -> Element(Msg) {
     Post(slug) ->
       case post.find_by_slug(model.posts, slug) {
         Ok(found) -> #(
-          post_view.view(found),
+          post_view.view(found, model.site_meta.comments),
           toc_view.view(found.toc, model.active_heading),
         )
         Error(Nil) -> #(view_not_found(), none())

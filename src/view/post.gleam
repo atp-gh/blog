@@ -14,6 +14,7 @@
 //// is trusted: it is produced from our own markdown sources, not user input.
 
 import data/post.{type Post}
+import data/site.{type CommentsConfig}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option}
@@ -21,6 +22,7 @@ import lustre/attribute
 import lustre/element.{type Element, none, unsafe_raw_html}
 import lustre/element/html
 import route
+import view/comments
 
 /// Render a single post.
 ///
@@ -39,7 +41,7 @@ import route
 /// macro exactly: the global `h1::before { content: "# " }` rule would
 /// otherwise prepend a `#` to the title. The `.page-header` class supplies
 /// the 2.5em header typography.
-pub fn view(post: Post) -> Element(msg) {
+pub fn view(post: Post, comments_config: CommentsConfig) -> Element(msg) {
   html.main([], [
     html.article([], [
       html.div([attribute.class("title")], [
@@ -50,6 +52,7 @@ pub fn view(post: Post) -> Element(msg) {
       unsafe_raw_html("", "section", [attribute.class("body")], post.body),
       view_tags(post.tags),
     ]),
+    comments.view(comments_config, post.slug),
   ])
 }
 
