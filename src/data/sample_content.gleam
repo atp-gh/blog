@@ -251,6 +251,143 @@ gleam add --dev lustre_dev_tools</code></pre>
       word_count: 180,
       reading_time: 1,
     ),
+    Post(
+      slug: "markdown",
+      title: "Markdown Test",
+      date: "2022-01-01",
+      updated: Some("2022-05-01"),
+      description: "A comprehensive test of markdown rendering: headings, code blocks, lists, quotes, tables, and inline code.",
+      body: "
+        <h1 id='h1'>H1</h1>
+
+        <h2 id='h2'>H2</h2>
+
+        <h3 id='h3'>H3</h3>
+
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+          incididunt ut labore et dolore magna aliqua. Aliquet sagittis id consectetur purus ut.
+          In pellentesque massa placerat duis ultricies. Neque laoreet suspendisse interdum
+          consectetur libero id. Justo nec ultrices dui sapien eget mi proin. Nunc consequat
+          interdum varius sit amet mattis vulputate. Sollicitudin tempor id eu nisl nunc mi ipsum.
+          Non odio euismod lacinia at quis. Sit amet nisl suscipit adipiscing. Amet mattis
+          vulputate enim nulla aliquet porttitor lacus luctus accumsan. Sit amet consectetur
+          adipiscing elit pellentesque habitant. Ac placerat vestibulum lectus mauris. Molestie ac
+          feugiat sed lectus vestibulum mattis ullamcorper velit sed.
+          <a href='https://www.google.com'>Google</a>
+        </p>
+
+        <p>
+          <img src='https://markdown-here.com/img/icon256.png' alt='Markdown Logo' />
+        </p>
+
+        <h2 id='code-block'>Code Block</h2>
+        <pre><code data-lang='rust'>fn main() {
+    println!(\"Hello World\");
+}</code></pre>
+
+        <pre><code data-lang='rust'>fn main() {
+    println!(\"Hello World\");
+}</code></pre>
+
+        <h2 id='ordered-list'>Ordered List</h2>
+        <ol>
+          <li>First item</li>
+          <li>Second item</li>
+          <li>Third item</li>
+        </ol>
+
+        <h2 id='unordered-list'>Unordered List</h2>
+        <ul>
+          <li>List item</li>
+          <li>Another item</li>
+          <li>And another item</li>
+        </ul>
+
+        <h2 id='nested-list'>Nested list</h2>
+        <ul>
+          <li>Fruit
+            <ul>
+              <li>Apple</li>
+              <li>Orange</li>
+              <li>Banana</li>
+            </ul>
+          </li>
+          <li>Dairy
+            <ul>
+              <li>Milk</li>
+              <li>Cheese</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h2 id='quote'>Quote</h2>
+        <blockquote>
+          <p>
+            Two things are infinite: the universe and human stupidity; and I'm not sure about the
+            universe.<br>
+            — <cite>Albert Einstein</cite>
+          </p>
+        </blockquote>
+
+        <h2 id='table-inline-markdown'>Table Inline Markdown</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Italics</th>
+              <th>Bold</th>
+              <th>Code</th>
+              <th>StrikeThrough</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><em>italics</em></td>
+              <td><strong>bold</strong></td>
+              <td><code>code</code></td>
+              <td><del>strikethrough</del></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id='foldable-text'>Foldable Text</h2>
+        <details>
+          <summary>Title 1</summary>
+          <p>IT'S A SECRET TO EVERYBODY.</p>
+        </details>
+        <details>
+          <summary>Title 2</summary>
+          <p>Stay awhile, and listen!</p>
+        </details>
+
+        <h2 id='code-tags'>Code tags</h2>
+        <p>
+          Lorem ipsum <code>dolor</code> sit amet, <code>consectetur adipiscing</code> elit.
+          <code>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</code>
+        </p>
+      ",
+      toc: [
+        TocEntry(id: "h2", title: "H2", children: []),
+        TocEntry(id: "h3", title: "H3", children: []),
+        TocEntry(id: "code-block", title: "Code Block", children: []),
+        TocEntry(id: "ordered-list", title: "Ordered List", children: []),
+        TocEntry(id: "unordered-list", title: "Unordered List", children: []),
+        TocEntry(id: "nested-list", title: "Nested list", children: []),
+        TocEntry(id: "quote", title: "Quote", children: []),
+        TocEntry(
+          id: "table-inline-markdown",
+          title: "Table Inline Markdown",
+          children: [],
+        ),
+        TocEntry(id: "foldable-text", title: "Foldable Text", children: []),
+        TocEntry(id: "code-tags", title: "Code tags", children: []),
+      ],
+      tags: ["example"],
+      draft: False,
+      tldr: None,
+      word_count: 200,
+      reading_time: 2,
+    ),
   ]
 }
 

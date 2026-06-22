@@ -58,10 +58,10 @@ import view/toc as toc_view
 
 // MAIN ------------------------------------------------------------------------
 
-/// Number of posts per page on the post list. With 4 sample posts and a page
-/// size of 3, page 1 shows 3 posts + a Next link, and page 2 shows 1 post +
-/// a Prev link — exercising both pagination states with the sample data.
-const posts_per_page = 3
+/// Number of posts per page on the post list. With 5 sample posts and a page
+/// size of 7 (matching apollo's `content/posts/_index.md` paginate_by), all
+/// posts fit on page 1.
+const posts_per_page = 7
 
 /// Boot the Lustre application and mount it onto the `#app` element rendered
 /// by the Lustre HTML tool's generated `index.html`.
