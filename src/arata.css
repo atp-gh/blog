@@ -1,0 +1,9 @@
+/*
+ * arata stylesheet entry.
+ *
+ * This file is the Lustre HTML tool's CSS entry (named after the project).
+ * During the scaffold phase it is intentionally minimal. Phase 3 of the
+ * roadmap ports apollo's SCSS design system here as plain CSS: the colour
+ * palette (light/dark), typography scale, three-column layout, the signature
+ * wavy boundary between sections, and all component styles.
+ */
