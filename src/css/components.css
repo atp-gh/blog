@@ -209,3 +209,13 @@
 .right-content .post-tags .tag {
   display: inline-block;
 }
+
+/* Fix 9: hide the right-sidebar Tags row below 1365px so it stays consistent
+   with the `.toc` block (which `toc.css` hides below the same breakpoint).
+   Without this, the Tags row would remain visible while the ToC below it
+   vanishes, leaving an orphan heading in the sidebar. */
+@media only screen and (max-width: 1365px) {
+  .right-content .post-tags {
+    display: none;
+  }
+}

@@ -256,6 +256,13 @@ fn view_theme_toggle(on_toggle: Attribute(msg)) -> Element(msg) {
         attribute.src("/icons/auto.svg"),
         attribute.id("auto-icon"),
         attribute.alt("Auto"),
+        // Fix 11: `display: block` matches the sun/moon icons' rendered
+        // state (the FFI sets them to `display: block` once it shows them),
+        // and `filter: invert(1)` makes the auto icon visible on both light
+        // and dark backgrounds — the source SVG is a solid silhouette so
+        // inverting keeps it readable in either theme.
+        attribute.style("display", "block"),
+        attribute.style("filter", "invert(1)"),
       ]),
     ],
   )

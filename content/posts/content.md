@@ -14,8 +14,8 @@ arata's content is authored as markdown files with TOML frontmatter in `content/
 ```markdown
 +++
 title = "My Post"
-date = "2025-01-15"
-updated = "2025-01-20"          # optional
+date = "2026-01-15"
+updated = "2026-01-20"          # optional
 description = "A short description for the post list and SEO."
 tags = ["gleam", "lustre"]
 draft = false

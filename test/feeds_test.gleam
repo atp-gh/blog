@@ -30,7 +30,7 @@ fn sample_posts() -> List(Post) {
     Post(
       slug: "first",
       title: "First Post",
-      date: "2025-01-01",
+      date: "2026-01-01",
       updated: None,
       description: "The first post.",
       body: "",
@@ -44,7 +44,7 @@ fn sample_posts() -> List(Post) {
     Post(
       slug: "second",
       title: "Second Post",
-      date: "2025-01-02",
+      date: "2026-01-02",
       updated: None,
       description: "The second post.",
       body: "",

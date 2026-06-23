@@ -108,26 +108,27 @@
 }
 
 /* =========================================================================
-   Scroll-to-top FAB (Fix 7) — sits to the left of the ToC FAB. Visible on
-   ALL pages (not just posts), so it lives at the layout level rather than
-   inside the post-only conditional.
+   Overlay header (Fix 8/10) — a flex row at the top of the overlay content
+   that holds the scroll-to-top button (top-right). The button dispatches
+   `UserScrolledToTop`, which fires the browser FFI's `window.scrollTo` via
+   an effect.
    ========================================================================= */
 
-.scroll-top-fab {
+.toc-overlay-header {
   display: flex;
-  position: fixed;
-  bottom: 1.5rem;
-  right: 5rem;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.toc-overlay-scroll-top {
   background: var(--bg-2);
-  color: var(--text-0);
   border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  z-index: 200;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }

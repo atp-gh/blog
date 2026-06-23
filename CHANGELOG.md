@@ -70,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code font loading**: code font no longer loads JetBrains Mono via `@font-face`; defaults to the `ui-monospace` system stack.
 - **Search scope**: search previously matched only title/description/tags; it now includes the post body too.
 
-## [0.1.0] — 2025-06-22
+## [0.1.0] — 2026-06-22
 
 The initial release of arata — a faithful reimplementation of the apollo blog theme using Gleam and Lustre.
 

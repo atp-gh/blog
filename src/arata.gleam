@@ -223,8 +223,9 @@ pub type Msg {
   /// The user clicked the mobile floating ToC button (toggles the
   /// bottom-sheet ToC overlay on post pages below 992px).
   UserToggledTocOverlay
-  /// The user clicked the scroll-to-top floating button (Fix 7). Smooth-
-  /// scrolls the window back to the top via the browser FFI.
+  /// The user clicked the scroll-to-top button inside the floating overlay
+  /// (Fix 8; superseded the standalone Fix 7 FAB). Smooth-scrolls the
+  /// window back to the top via the browser FFI.
   UserScrolledToTop
   /// The user submitted the page-jump input on the post list (Enter or
   /// blur). The string is the raw input value; the update parses it to an
@@ -392,7 +393,7 @@ fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       effect.none(),
     )
     UserScrolledToTop -> {
-      // Fix 7: smooth-scroll the window to the top. The FFI is a no-op
+      // Fix 7/8: smooth-scroll the window to the top. The FFI is a no-op
       // outside the browser (Erlang target); the model is unchanged.
       let eff =
         effect.from(fn(_) {
@@ -507,7 +508,7 @@ fn content_msg_to_msg(cm: content_runtime.ContentMsg) -> Msg {
   }
 }
 
-/// Fix 7: smooth-scroll the window to the top. The FFI lives in
+/// Fix 7/8: smooth-scroll the window to the top. The FFI lives in
 /// `src/ffi/browser.ffi.mjs`; on non-JS targets it's a no-op (returns `Nil`).
 /// Note: this module (`src/arata.gleam`) is at the package root, so the path
 /// is `./ffi/...` (not `../ffi/...` as in subdirectory modules).
@@ -608,7 +609,11 @@ fn view(model: Model) -> Element(Msg) {
       case post.find_by_slug(model.posts, slug) {
         Ok(found) -> #(
           post_view.view(found, model.site_meta.comments),
-          view_tags_and_toc(found.tags, found.toc, model.active_heading),
+          case model.config.sidebar_enabled {
+            True ->
+              view_tags_and_toc(found.tags, found.toc, model.active_heading)
+            False -> none()
+          },
         )
         Error(Nil) -> #(view_not_found(), none())
       }
@@ -666,26 +671,35 @@ fn view(model: Model) -> Element(Msg) {
         <> model.config.fonts.code
         <> "; }",
     )
-  // On a single post with TOC entries, render a floating action button (FAB)
-  // in the bottom-right corner that opens a bottom-sheet ToC overlay. Fix 5
-  // lifted the CSS media-query gate so the FAB and overlay are visible on
-  // ALL screen sizes; emitting them on every platform is now intentional.
-  // Fix 6 also renders the post's tags inside the overlay, below the ToC.
-  let toc_fab_els = case model.route {
-    Post(slug) ->
-      case post.find_by_slug(model.posts, slug) {
-        Ok(found) ->
-          case found.toc {
-            [] ->
-              // No ToC entries: still show a FAB if the post has tags, so
-              // mobile readers can reach them from any post.
-              case found.tags {
-                [] -> []
-                _ -> [
+  // On a single post, render a floating action button (FAB) in the bottom-
+  // right corner that opens a bottom-sheet overlay containing the post's
+  // Tags (above) and ToC (below), plus a scroll-to-top button at the top-
+  // right of the overlay. Fix 5 lifted the CSS media-query gate so the FAB
+  // and overlay are visible on ALL screen sizes; emitting them on every
+  // platform is now intentional. The FAB + overlay are only emitted when
+  // `config.floating_buttons_enabled` is True (Fix 5 toggle).
+  //
+  // Fix 7: the duplicate "Table of Contents" heading is gone — `toc_view.view`
+  // already renders its own heading, so the overlay no longer adds one.
+  // Fix 8/10: the overlay content is now [scroll-top button header, Tags,
+  // ToC] in that order, flattened via `list.flatten` so each section can be
+  // independently conditional.
+  let toc_fab_els = case model.config.floating_buttons_enabled {
+    True ->
+      case model.route {
+        Post(slug) ->
+          case post.find_by_slug(model.posts, slug) {
+            Ok(found) ->
+              case found.toc, found.tags {
+                [], [] -> []
+                _, _ -> [
                   html.button(
                     [
                       attribute.class("toc-fab"),
-                      attribute.attribute("aria-label", "Open tags"),
+                      attribute.attribute(
+                        "aria-label",
+                        "Open table of contents",
+                      ),
                       event.on_click(UserToggledTocOverlay),
                     ],
                     [html.text("☰")],
@@ -698,9 +712,37 @@ fn view(model: Model) -> Element(Msg) {
                           event.on_click(UserToggledTocOverlay),
                         ],
                         [
-                          html.div([attribute.class("toc-overlay-content")], [
-                            view_tags_sidebar(found.tags),
-                          ]),
+                          html.div(
+                            [attribute.class("toc-overlay-content")],
+                            list.flatten([
+                              [
+                                html.div(
+                                  [attribute.class("toc-overlay-header")],
+                                  [
+                                    html.button(
+                                      [
+                                        attribute.class(
+                                          "toc-overlay-scroll-top",
+                                        ),
+                                        event.on_click(UserScrolledToTop),
+                                      ],
+                                      [html.text("↑")],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              case found.tags {
+                                [] -> []
+                                _ -> [view_tags_sidebar(found.tags)]
+                              },
+                              case found.toc {
+                                [] -> []
+                                _ -> [
+                                  toc_view.view(found.toc, model.active_heading),
+                                ]
+                              },
+                            ]),
+                          ),
                         ],
                       ),
                     ]
@@ -708,59 +750,12 @@ fn view(model: Model) -> Element(Msg) {
                   }
                 ]
               }
-            _ -> [
-              html.button(
-                [
-                  attribute.class("toc-fab"),
-                  attribute.attribute("aria-label", "Open table of contents"),
-                  event.on_click(UserToggledTocOverlay),
-                ],
-                [html.text("☰")],
-              ),
-              ..case model.toc_overlay_open {
-                True -> [
-                  html.div(
-                    [
-                      attribute.class("toc-overlay"),
-                      event.on_click(UserToggledTocOverlay),
-                    ],
-                    [
-                      html.div([attribute.class("toc-overlay-content")], [
-                        html.div([attribute.class("heading")], [
-                          html.text("Table of Contents"),
-                        ]),
-                        toc_view.view(found.toc, model.active_heading),
-                        // Fix 6: after the ToC, show the post's tags (if any)
-                        // so mobile readers can jump to a taxonomy page
-                        // without scrolling back to the right sidebar.
-                        ..case found.tags {
-                          [] -> []
-                          _ -> [view_tags_sidebar(found.tags)]
-                        }
-                      ]),
-                    ],
-                  ),
-                ]
-                False -> []
-              }
-            ]
+            Error(Nil) -> []
           }
-        Error(Nil) -> []
+        _ -> []
       }
-    _ -> []
+    False -> []
   }
-  // Fix 7: a separate scroll-to-top FAB, visible on ALL pages (not just
-  // posts), positioned to the left of the ToC FAB. Smooth-scrolls via the
-  // browser FFI.
-  let scroll_top_fab_el =
-    html.button(
-      [
-        attribute.class("scroll-top-fab"),
-        attribute.attribute("aria-label", "Scroll to top"),
-        event.on_click(UserScrolledToTop),
-      ],
-      [html.text("↑")],
-    )
   html.div(
     [],
     list.flatten([
@@ -781,7 +776,6 @@ fn view(model: Model) -> Element(Msg) {
         ),
       ],
       [search_modal_el],
-      [scroll_top_fab_el],
       toc_fab_els,
     ]),
   )

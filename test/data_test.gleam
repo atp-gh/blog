@@ -18,7 +18,7 @@ fn sample_posts() -> List(Post) {
     Post(
       slug: "a",
       title: "Post A",
-      date: "2025-01-01",
+      date: "2026-01-01",
       updated: None,
       description: "About gleam",
       body: "",
@@ -32,7 +32,7 @@ fn sample_posts() -> List(Post) {
     Post(
       slug: "b",
       title: "Post B",
-      date: "2025-01-02",
+      date: "2026-01-02",
       updated: None,
       description: "About css",
       body: "",
@@ -46,7 +46,7 @@ fn sample_posts() -> List(Post) {
     Post(
       slug: "c",
       title: "Post C",
-      date: "2025-01-03",
+      date: "2026-01-03",
       updated: None,
       description: "More gleam",
       body: "",

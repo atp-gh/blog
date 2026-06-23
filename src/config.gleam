@@ -65,6 +65,15 @@ pub type Config {
     /// on post navigation) — useful when no post uses LaTeX. Defaults to
     /// `False` to avoid loading MathJax unless explicitly opted in.
     mathjax_enabled: Bool,
+    /// Whether the right sidebar (Tags + ToC) is rendered on post pages.
+    /// When `False`, `view_tags_and_toc` is omitted so the post body takes
+    /// the full content width. Defaults to `True` so the sidebar shows on
+    /// every post unless explicitly disabled.
+    sidebar_enabled: Bool,
+    /// Whether the floating buttons (the ToC/tags FAB and the overlay's
+    /// scroll-to-top button) are rendered. When `False`, no FAB is shown
+    /// and the overlay is not reachable. Defaults to `True`.
+    floating_buttons_enabled: Bool,
   )
 }
 
@@ -106,6 +115,8 @@ pub fn default() -> Config {
     search_enabled: True,
     analytics: AnalyticsDisabled,
     mathjax_enabled: False,
+    sidebar_enabled: True,
+    floating_buttons_enabled: True,
   )
 }
 
