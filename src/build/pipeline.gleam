@@ -3,24 +3,19 @@
 ////
 //// Running `gleam run -m build/pipeline` produces a complete static site in
 //// `dist/`:
-////   1. Emits the JSON content index, search index, feeds, sitemap, a custom
-////      `index.html` with FOUC prevention, and a `404.html` that serves the
-////      SPA shell directly (so deep-link refreshes load the SPA without a
-////      redirect).
-////   2. Copies each CSS module under `src/css/` (base, layout, components,
-////      post, cards, links, search, toc, syntax, accessibility) to
-////      `dist/css/` as a separate file, allowing the browser to load them
-////      in parallel and cache independently (true on-demand loading).
-////   3. Copies all static assets (fonts, icons, images) from `static/` to
-////      `dist/`.
-////   4. Compiles the Gleam JavaScript and bundles it into `dist/app.mjs` via
-////      `bun build` (replacing `lustre/dev build`, which requires Erlang/OTP).
+////   1. Emits the JSON content index, search index, feeds, sitemap, robots.txt,
+////      a custom `index.html` with FOUC prevention, and a `404.html` that
+////      serves the SPA shell directly.
+////   2. Copies each CSS module under `src/css/` to `dist/css/`.
+////   3. Copies all static assets from `static/` to `dist/`.
+////   4. Compiles the Gleam JavaScript and bundles it into `dist/app.mjs`.
 ////
 //// The content source is the `.md` files under `content/` (loaded by
 //// `content/loader`), serialized to `content_index.json` for the SPA to
 //// fetch at runtime.
 
 import build/feeds
+import build/robots
 import content/loader
 import data/link.{type Link}
 import data/page.{type Page}
@@ -87,9 +82,8 @@ pub fn run() -> Result(Nil, String) {
   write(dist_dir <> "/search_index.json", search_index_json(posts))
 
   // 3. Feeds. Only emit `atom.xml` / `rss.xml` when RSS is enabled in the
-  // site metadata; otherwise the feed files are skipped (and the `<link>`
-  // tags in `index.html` are omitted below). This mirrors blogatto's opt-out
-  // feed model.
+  // site metadata; otherwise the feed files are skipped. This mirrors
+  // blogatto's opt-out feed model.
   case site_meta.rss_enabled {
     True -> {
       write(dist_dir <> "/atom.xml", feeds.atom_feed(site_meta, posts))
@@ -102,30 +96,37 @@ pub fn run() -> Result(Nil, String) {
   let page_slugs = list.map(pages, fn(p) { p.slug })
   write(dist_dir <> "/sitemap.xml", feeds.sitemap(site_meta, posts, page_slugs))
 
-  // 5. Custom index.html with FOUC prevention.
+  // 5. robots.txt.
+  //
+  // This must be a real static file in dist/. The SPA router only prevents
+  // modem from treating `/robots.txt` as a standalone page; it does not create
+  // the file. Search engines and crawlers expect this file at the site root.
+  write(dist_dir <> "/robots.txt", robots.render(site_meta))
+
+  // 6. Custom index.html with FOUC prevention.
   write(dist_dir <> "/index.html", index_html(site_meta))
 
-  // 6. 404.html — the SPA shell (same content as index.html). Static hosts
+  // 7. 404.html — the SPA shell (same content as index.html). Static hosts
   // that serve 404.html for unknown paths load the SPA directly; the SPA's
   // modem reads `window.location.pathname` and the router handles the deep
   // link, no redirect needed (preserves the URL).
   write(dist_dir <> "/404.html", not_found_html(site_meta))
 
-  // 7. Copy each CSS module from src/css/ to dist/css/ as a separate file.
+  // 8. Copy each CSS module from src/css/ to dist/css/ as a separate file.
   build_css()
 
-  // 8. Copy all static assets (fonts, icons, images, vendored CSS) to dist/.
+  // 9. Copy all static assets (fonts, icons, images, vendored CSS) to dist/.
   copy_directory_contents(static_dir, dist_dir)
 
-  // 9. Compile the Gleam JavaScript and bundle into dist/app.mjs.
+  // 10. Compile the Gleam JavaScript and bundle into dist/app.mjs.
   bundle_spa()
 
   io.println("Build complete. dist/ contains:")
   io.println("  index.html, 404.html, app.mjs,")
   io.println("  content_index.json, search_index.json,")
   case site_meta.rss_enabled {
-    True -> io.println("  atom.xml, rss.xml, sitemap.xml,")
-    False -> io.println("  sitemap.xml, (feeds disabled)")
+    True -> io.println("  atom.xml, rss.xml, sitemap.xml, robots.txt,")
+    False -> io.println("  sitemap.xml, robots.txt, (feeds disabled)")
   }
   io.println("  fonts/, icons/, images/, css/")
 
@@ -144,12 +145,14 @@ fn write(path: String, content: String) -> Nil {
 /// independently. A missing module is logged but does not abort the build.
 fn build_css() -> Nil {
   let _ = simplifile.create_directory_all(dist_dir <> "/css")
+
   list.each(css_modules, fn(path) {
     let filename =
       path
       |> string.split("/")
       |> list.last
       |> result.unwrap("unknown.css")
+
     case simplifile.copy(path, dist_dir <> "/css/" <> filename) {
       Ok(_) -> Nil
       Error(e) ->
@@ -161,6 +164,7 @@ fn build_css() -> Nil {
         )
     }
   })
+
   Nil
 }
 
@@ -184,14 +188,17 @@ fn copy_directory_contents(src: String, dest: String) -> Nil {
       list.each(entries, fn(entry) {
         let src_path = src <> "/" <> entry
         let dest_path = dest <> "/" <> entry
+
         case simplifile.copy_directory(src_path, dest_path) {
           Ok(_) -> Nil
           Error(_) -> copy_file(src_path, dest_path)
         }
       })
+
     Error(e) ->
       io.println("Warning: could not read " <> src <> ": " <> simplify_error(e))
   }
+
   Nil
 }
 
@@ -200,27 +207,9 @@ fn copy_directory_contents(src: String, dest: String) -> Nil {
 /// `gleam build` must have already run (it does as part of `gleam run`).
 ///
 /// The Gleam entry module (`arata.mjs`) exports `main()` but does not call it
-/// (Gleam only auto-calls `main` on the Erlang target). `lustre_dev_tools`
-/// works around this by generating a small entry shim that imports and calls
-/// `main()`. We do the same: write a temporary `entry.mjs` that imports
-/// `main` from the compiled `arata.mjs` and invokes it, then bundle that.
+/// on the JavaScript target. We write a small temporary entry shim that imports
+/// and invokes `main()`, then bundle that.
 fn bundle_spa() -> Nil {
-  // Bundle size analysis (app.mjs):
-  //   - 115KB minified, 32KB gzipped (reasonable for a Lustre SPA).
-  //   - 134 modules bundled.
-  //   - Main contributors: lustre runtime (vdom, reconciler, virtualise,
-  //     dispatch), gleam_stdlib (CustomType, List, etc.), modem (routing).
-  //   - No simplifile, tom, mork, or mork_to_lustre in the bundle (they
-  //     are build-time only and tree-shaken out).
-  //   - No lustre server runtime or component runtime (not used by the SPA).
-  //   - `bun build --external` does not reduce size (transitive imports
-  //     still pull the modules in).
-  // The bundle is already well-optimized; `--minify` (used below) is the
-  // main lever. No further code changes are needed here.
-
-  // Write the entry shim that calls main(). The shim lives alongside
-  // arata.mjs in build/dev/javascript/arata/, so the import is relative
-  // to that directory: "./arata.mjs".
   let shim = "import { main } from \"./arata.mjs\"; main();"
   let shim_path = "build/dev/javascript/arata/entry.mjs"
   let _ = simplifile.write(shim_path, shim)
@@ -231,6 +220,7 @@ fn bundle_spa() -> Nil {
     <> " --outfile "
     <> dist_dir
     <> "/app.mjs --minify --target=browser 2>/dev/null"
+
   case run_command(cmd) {
     0 -> Nil
     code -> {
@@ -255,7 +245,7 @@ fn simplify_error(_e: simplifile.FileError) -> String {
 fn run_command(command: String) -> Int
 
 /// The content index JSON: the full content tree serialized for the SPA to
-/// consume (or for future SSR hydration).
+/// consume.
 fn content_index_json(
   site_meta: site.SiteMeta,
   posts: List(Post),
@@ -270,6 +260,7 @@ fn content_index_json(
       #("description", json.string(site_meta.description)),
       #("base_url", json.string(site_meta.base_url)),
     ])
+
   let posts_arr =
     json.array(posts, fn(post) {
       json.object([
@@ -293,7 +284,9 @@ fn content_index_json(
         #("reading_time", json.int(post.reading_time)),
       ])
     })
+
   let projects_arr = json.array(projects, fn(project) { project_json(project) })
+
   let links_arr =
     json.array(links, fn(link) {
       json.object([
@@ -303,6 +296,7 @@ fn content_index_json(
         #("image", option_to_json(link.image)),
       ])
     })
+
   let pages_arr =
     json.array(pages, fn(page) {
       json.object([
@@ -315,6 +309,7 @@ fn content_index_json(
         }),
       ])
     })
+
   let home_obj =
     json.object([
       #("slug", json.string(homepage.slug)),
@@ -325,6 +320,7 @@ fn content_index_json(
         None -> json.null()
       }),
     ])
+
   json.to_string(
     json.object([
       #("config", config_obj),
@@ -339,9 +335,7 @@ fn content_index_json(
 
 /// Serialize a `Project` as `{slug, title, description, link_to, image,
 /// github, gitlab, codeberg, forgejo, demo, tags}`. Optional fields are
-/// emitted as JSON `null` when `None` so the runtime decoder's
-/// `decode.optional_field` round-trips them. Fix 13 added gitlab/codeberg/
-/// forgejo.
+/// emitted as JSON `null` when `None`.
 fn project_json(project: Project) -> json.Json {
   json.object([
     #("slug", json.string(project.slug)),
@@ -389,17 +383,14 @@ fn search_index_json(posts: List(Post)) -> String {
 }
 
 /// The custom `index.html` with FOUC prevention: both `light` and `dark`
-/// classes on `<html>`, both theme stylesheets loaded (dark `disabled`), and
-/// the SPA script. The theme FFI toggles the `disabled` attribute at runtime.
+/// classes on `<html>`, CSS modules loaded in order, and the SPA script.
 ///
 /// Feed `<link rel='alternate'>` tags are only emitted when
 /// `site_meta.rss_enabled` is `True`.
 ///
 /// All asset paths are absolute (`/app.mjs`, `/css/...`, `/icon/...`) rather
 /// than relative (`./app.mjs`). On a deep link like `/posts/markdown`, the
-/// static host serves 404.html (which is this same HTML), and a relative
-/// `./app.mjs` would resolve to `/posts/app.mjs` — a 404 that breaks the SPA.
-/// Absolute paths resolve correctly regardless of the URL path.
+/// static host serves 404.html, and relative assets would resolve incorrectly.
 fn index_html(site_meta: site.SiteMeta) -> String {
   let feed_links = case site_meta.rss_enabled {
     True ->
@@ -408,6 +399,7 @@ fn index_html(site_meta: site.SiteMeta) -> String {
 "
     False -> ""
   }
+
   "<!DOCTYPE html>
 <html lang='en' class='dark light'>
 <head>
@@ -434,13 +426,7 @@ fn index_html(site_meta: site.SiteMeta) -> String {
 </html>"
 }
 
-/// The 404.html page: the SPA shell (identical to `index.html`). When a
-/// static host serves 404.html for an unknown path, the SPA loads, modem
-/// reads `window.location.pathname`, and the router handles the route — no
-/// redirect, URL preserved. Previous versions used a sessionStorage +
-/// `window.location.href = '/'` shim, which discarded the URL bar and
-/// required an FFI round-trip to restore; serving the SPA directly is
-/// simpler and lossless.
+/// The 404.html page: the SPA shell, identical to `index.html`.
 fn not_found_html(site_meta: site.SiteMeta) -> String {
   index_html(site_meta)
 }
