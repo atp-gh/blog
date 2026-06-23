@@ -77,7 +77,8 @@ gleam test
 gleam run -m build/pipeline
 
 # Serve dist/ locally and open it in a browser.
-python -m http.server --directory dist
+# Use a static server that supports SPA deep-link fallback.
+nix run nixpkgs#http-server -- -p 8080 dist
 ```
 
 The build pipeline is self-contained: it reads the `.md` files under `content/`, parses the TOML frontmatter with `tom`, renders the Markdown bodies with `mork`, serializes everything to `dist/content_index.json` (and `dist/search_index.json`), emits feeds/sitemap, writes the 10 CSS modules to `dist/css/`, copies `static/` to `dist/`, and bundles the SPA into `dist/app.mjs` via `bun build`.
@@ -198,7 +199,7 @@ dist/
 └── images/
 ```
 
-Serve `dist/` with any static file host (GitHub Pages, Cloudflare Pages, Netlify, `python -m http.server`, etc.). Static hosts that serve `404.html` for unknown paths load the SPA shell directly on a deep-link refresh — modem reads the URL from the address bar and routes to the right post, so the URL is preserved verbatim and no redirect is needed.
+Serve `dist/` with any static file host (GitHub Pages, Cloudflare Pages, Netlify, etc.). Static hosts that serve `404.html` for unknown paths load the SPA shell directly on a deep-link refresh — modem reads the URL from the address bar and routes to the right post, so the URL is preserved verbatim and no redirect is needed.
 
 See [`content/posts/deployment.md`](./content/posts/deployment.md) for the full deployment guide.
 
