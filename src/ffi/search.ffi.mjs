@@ -16,6 +16,10 @@ export function subscribe_to_search_keys(dispatch) {
   if (typeof window === "undefined") return () => {};
   const handler = (e) => {
     const cmd_or_ctrl = e.metaKey || e.ctrlKey;
+    // Prevent Cmd/Ctrl+K from focusing the browser address bar
+    if (cmd_or_ctrl && e.key === "k") {
+      e.preventDefault();
+    }
     dispatch({
       key: e.key,
       cmd_or_ctrl: cmd_or_ctrl,

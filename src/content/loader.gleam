@@ -282,7 +282,7 @@ fn parse_headings(html: String) -> List(#(Int, String, String)) {
   |> list.filter_map(fn(piece) {
     use #(level_ch, rest) <- result.try(string.pop_grapheme(piece))
     use level <- result.try(int.parse(level_ch))
-    use #(after_id_open, _) <- result.try(string.split_once(rest, "id=\""))
+    use #(_, after_id_open) <- result.try(string.split_once(rest, "id=\""))
     use #(id, after_id_close) <- result.try(string.split_once(
       after_id_open,
       "\"",

@@ -433,7 +433,7 @@ fn not_found_html() -> String {
     // handle it. This is the standard pattern for SPA deep-linking on
     // GitHub/Cloudflare Pages.
     var path = window.location.pathname;
-    window.location.href = '/#' + path;
+    window.location.href = path;
   </script>
 </head>
 <body>
