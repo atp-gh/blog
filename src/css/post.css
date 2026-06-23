@@ -13,6 +13,15 @@
   margin-left: 6px;
   background-color: var(--primary-color);
 }
+
+/* Fix 6: pin the post body (`.body` section) to font-weight 400 so the
+   content reads as normal text, distinct from the 700-weight h1/h2/h3
+   headings. With Fix 4 the html element is already 400, but stating it
+   explicitly here makes the intent obvious and insulates the post body
+   from future global font-weight changes. */
+.body {
+  font-weight: 400;
+}
 blockquote {
   border-left: 3px solid var(--primary-color);
   /* Fix 10: lifted the blockquote text color from the muted #737373 to a

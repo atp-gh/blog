@@ -148,10 +148,17 @@ fn view_site_title(config: Config) -> Element(msg) {
 
 fn view_socials(socials: List(config.Social)) -> List(Element(msg)) {
   list.map(socials, fn(social) {
+    // Fix 9b/10: `target="_blank"` opens social links in a new tab. This
+    // also stops modem (the SPA router) from intercepting same-origin
+    // clicks — without it, clicking the RSS link on a sub-page like
+    // `/posts/markdown` would be hijacked by the router and 404 instead
+    // of fetching `/atom.xml`. External links (GitHub, etc.) already
+    // open in a new tab anyway, so this is consistent for all socials.
     html.a(
       [
         attribute.class("social"),
         attribute.href(social.url),
+        attribute.target("_blank"),
         attribute.rel("me"),
       ],
       [
@@ -214,6 +221,13 @@ fn view_theme_toggle(on_toggle: Attribute(msg)) -> Element(msg) {
   // (an `event.on_click(UserToggledTheme)` from the caller) dispatches the
   // theme-cycle message. Three icons (sun/moon/auto) are rendered; the FFI
   // shows/hides them based on the current theme.
+  //
+  // Fix 11: the moon and auto icons start with `display:none` so only the
+  // sun icon is visible on initial render (light is the default theme).
+  // Previously all three icons flashed on screen until `apply_theme` ran,
+  // producing a visible "three stacked icons" flicker on every navigation.
+  // The FFI's `apply_theme` overwrites `display` once it loads, so this
+  // initial inline style is purely a no-flicker default.
   html.button(
     [
       attribute.id("dark-mode-toggle"),
@@ -230,11 +244,13 @@ fn view_theme_toggle(on_toggle: Attribute(msg)) -> Element(msg) {
         attribute.src("/icons/moon.svg"),
         attribute.id("moon-icon"),
         attribute.alt("Dark"),
+        attribute.style("display", "none"),
       ]),
       html.img([
         attribute.src("/icons/auto.svg"),
         attribute.id("auto-icon"),
         attribute.alt("Auto"),
+        attribute.style("display", "none"),
       ]),
     ],
   )

@@ -81,10 +81,14 @@ pub fn default() -> Config {
       MenuItem(name: "tags", url: "/tags"),
       MenuItem(name: "about", url: "/about"),
     ],
-    // The RSS social link is only added when `rss_enabled` is `True`. The URL
-    // is relative (`./atom.xml`) so it resolves correctly when the site is
-    // served from a subdirectory (e.g. a GitHub Pages project path) rather
-    // than the domain root — an absolute `/atom.xml` would 404 there.
+    // The RSS social link is only added when `rss_enabled` is `True`. Fix
+    // 9b/10: the URL is absolute (`/atom.xml`) so it resolves correctly on
+    // every page (a relative `./atom.xml` would 404 on sub-pages like
+    // `/posts/markdown`, where it expands to `/posts/atom.xml`). The header
+    // view (`view_socials`) adds `target="_blank"` to social links so modem
+    // (the SPA router) does not intercept the click and the browser fetches
+    // the feed directly. Subdirectory-hosted deployments should configure a
+    // base URL prefix instead of relying on a relative path.
     socials: default_socials(rss_enabled),
     logo: None,
     rss_enabled:,
@@ -111,7 +115,7 @@ pub fn default() -> Config {
 /// whatever `socials` it receives.
 fn default_socials(rss_enabled: Bool) -> List(Social) {
   let rss = case rss_enabled {
-    True -> [Social(name: "RSS", url: "./atom.xml", icon: "rss")]
+    True -> [Social(name: "RSS", url: "/atom.xml", icon: "rss")]
     False -> []
   }
   list.append(rss, [

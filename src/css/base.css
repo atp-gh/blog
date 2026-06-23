@@ -119,6 +119,12 @@
   --header-font: "ZedDisplayFtl", "Space Grotesk", "Helvetica", sans-serif;
   --code-font: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 
+  /* Fix 5: semi-transparent body text color. Light theme uses a dark
+     near-opaque gray (#151515DE ≈ 87% alpha); dark theme overrides with a
+     light near-opaque gray (#F0F0F0DE). Headings/links/etc. still use
+     `--text-0` so only body copy is affected. */
+  --body-text: #151515de;
+
   /* Layout & type scale */
   --line-height: 1.5;
   --page-width: 920px;
@@ -160,6 +166,10 @@
   --text-1: #999999;     /* lighten(#121212, 60%) */
   --text-2: #737373;     /* lighten(#121212, 40%) */
 
+  /* Fix 5: dark-theme body text — semi-transparent light gray (#F0F0F0DE)
+     as the user requested for body copy. */
+  --body-text: #f0f0f0de;
+
   /* --border-color stays var(--bg-2) (defined on :root) */
   /* --primary-color stays #3555b3 */
   /* --hover-color stays white */
@@ -181,14 +191,18 @@
 
 html {
   background-color: var(--bg-0);
-  color: var(--text-0);
+  /* Fix 5: body text color uses the semi-transparent --body-text variable
+     (light: #151515DE, dark: #F0F0F0DE) rather than the fully-opaque
+     --text-0, per the user's request. */
+  color: var(--body-text);
   font-family: var(--text-font);
   line-height: var(--line-height);
-  /* Fix 8 — body text font-weight: bumped from 400 (default) to 500, then
-     raised again to 600 (semi-bold) so the body text reads clearly heavy,
-     matching the visual density of modern system-UI web text. Headings and
-     bold spans override this via their own font-weight rules. */
-  font-weight: 600;
+  /* Fix 4 — reverted body font-weight back to 400 (normal). The earlier
+     bump to 500/600 made body text too heavy and visually competed with
+     headings; the user asked to return to the previous default weight.
+     Headings retain their own font-weight (700 via the @font-face Bold cut
+     and CSS) so they still stand out. */
+  font-weight: 400;
 }
 
 @media (max-width: 992px) {

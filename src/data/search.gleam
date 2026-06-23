@@ -9,9 +9,10 @@
 //// lands in Phase 17).
 ////
 //// Fix 9a: each `SearchResult` now carries a context `snippet` showing where
-//// the query matched in the post body (30 characters before and after the
-//// match, with ellipses). When the match is in the title/tags (not the body),
-//// the snippet falls back to the post's description.
+//// the query matched in the post body (80 characters before and after the
+//// match, with ellipses — Fix 8 raised the window from 30 to 80). When the
+//// match is in the title/tags (not the body), the snippet falls back to
+//// the post's description.
 
 import data/post.{type Post}
 import gleam/int
@@ -26,8 +27,9 @@ pub type SearchResult {
 /// Search `posts` for `query`. Returns matching posts sorted by relevance
 /// (title matches first, then description, then tags). An empty query returns
 /// an empty list. Matching is case-insensitive. Fix 9a: each result carries
-/// a context `snippet` showing ~30 chars before and after the first body
+/// a context `snippet` showing ~80 chars before and after the first body
 /// match (falling back to the description when the match isn't in the body).
+/// Fix 8 bumped the context from 30 to 80 graphemes for better readability.
 pub fn search(posts: List(Post), query: String) -> List(SearchResult) {
   case query {
     "" -> []
@@ -64,12 +66,16 @@ fn matches(post: Post, query: String) -> Bool {
 /// lowercased by the caller) in the post. We try the body first; if the
 /// query doesn't appear in the stripped body, we fall back to the post's
 /// description so the result row always has some text to display.
+///
+/// Fix 8: widened the context window from 30 → 80 graphemes on each side
+/// of the match so users get a better sense of the surrounding sentence
+/// (30 was too tight to disambiguate matches in longer posts).
 fn extract_snippet(post: Post, query: String) -> String {
   let body = string.lowercase(strip_html(post.body))
   case string.split_once(body, query) {
     Ok(#(before, after)) -> {
-      let before_snippet = take_last(before, 30)
-      let after_snippet = take_first(after, 30)
+      let before_snippet = take_last(before, 80)
+      let after_snippet = take_first(after, 80)
       "..." <> before_snippet <> query <> after_snippet <> "..."
     }
     Error(_) -> post.description

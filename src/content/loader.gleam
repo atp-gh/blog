@@ -539,11 +539,55 @@ fn is_ascii_slug_char(ch: String) -> Bool {
 }
 
 /// Count words in a markdown string (rough estimate).
+///
+/// Fix 10: handle CJK text. The previous implementation just split on spaces,
+/// which meant a paragraph of Chinese/Japanese/Korean text (no inter-word
+/// spaces) counted as a single "word" — turning a 500-character essay into a
+/// 1-word post with `reading_time = 0`. The new algorithm walks the markdown
+/// grapheme-by-grapheme and counts:
+///
+///   - each whitespace char (` `, `\n`, `\t`) as a word *boundary* (ends the
+///     current ASCII word without adding to the count),
+///   - each multi-byte grapheme (CJK ideographs, hiragana, katakana, hangul,
+///     and as a harmless side effect accented Latin and emoji) as **one word**,
+///   - each run of ASCII chars (letters, digits, punctuation) as **one word**,
+///     counted at the moment the run starts.
+///
+/// Code blocks (lines starting with ```` ``` ````) are skipped before
+/// counting, matching the previous behaviour.
+///
+/// Examples:
+///   `"hello world"`  → 2  (hello, world)
+///   `"hello 世界"`    → 3  (hello, 世, 界)
+///   `"你好世界"`       → 4  (你, 好, 世, 界)
+///   `"hello世界"`     → 3  (hello, 世, 界)
 fn count_words(markdown: String) -> Int {
-  markdown
-  |> string.split("\n")
-  |> list.filter(fn(line) { !string.starts_with(line, "```") })
-  |> string.join("\n")
-  |> string.split(" ")
-  |> list.length()
+  let text =
+    markdown
+    |> string.split("\n")
+    |> list.filter(fn(line) { !string.starts_with(line, "```") })
+    |> string.join(" ")
+  let graphemes = string.to_graphemes(text)
+  let #(count, _in_word) =
+    list.fold(graphemes, #(0, False), fn(acc, ch) {
+      let #(count, in_word) = acc
+      case ch {
+        " " | "\n" | "\t" -> #(count, False)
+        _ ->
+          case string.byte_size(ch) > 1 {
+            // Multi-byte grapheme (CJK / accented Latin / emoji): counts as
+            // its own word and ends any in-progress ASCII run so the next
+            // ASCII char starts a fresh word.
+            True -> #(count + 1, False)
+            // ASCII grapheme: if we're mid-word it's part of the current
+            // word (no increment); otherwise it begins a new word (+1).
+            False ->
+              case in_word {
+                True -> #(count, True)
+                False -> #(count + 1, True)
+              }
+          }
+      }
+    })
+  count
 }
