@@ -197,7 +197,7 @@ fn load_post(path: String, filename: String) -> Result(Post, Nil) {
     Error(_) -> None
   }
   let html_body = markdown.to_html(body) |> add_heading_ids
-  let toc = extract_toc(body)
+  let toc = extract_toc_from_html(html_body)
   let word_count = count_words(body)
   let reading_time = case word_count {
     0 -> 0
@@ -251,32 +251,121 @@ fn split_frontmatter(content: String) -> #(String, String) {
   }
 }
 
-/// Extract a simple table of contents from the markdown body.
-fn extract_toc(markdown: String) -> List(TocEntry) {
-  markdown
-  |> string.split("\n")
-  |> list.filter(fn(line) { string.starts_with(line, "## ") })
-  |> list.map(fn(line) {
-    let title =
-      line
-      |> string.drop_start(up_to: 3)
-      |> string.trim()
-    let id = slugify(title)
-    TocEntry(id: id, title: title, children: [])
+/// Extract a table of contents from rendered HTML. Parses every `<hN id="...">`
+/// heading tag (N = 2, 3, 4) mork emitted and `add_heading_ids` stamped with an
+/// `id`, then builds a nested `TocEntry` tree: h2 entries sit at the top level,
+/// h3 entries nest under the preceding h2, and h4 entries nest under the
+/// preceding h3. Reading the `id` straight from the rendered HTML guarantees
+/// the TOC's `#id` anchors resolve to the right heading — no risk of the
+/// slugify algorithm drifting out of sync between TOC extraction and ID
+/// injection. CJK headings, which slugify leaves untouched and which would
+/// otherwise produce IDs that browsers can't match against percent-encoded
+/// fragment links, fall back to sequential `heading-N` IDs (assigned by
+/// `add_heading_ids`), and we just read those back here.
+fn extract_toc_from_html(html: String) -> List(TocEntry) {
+  let all_headings = parse_headings(html)
+  let toc_headings =
+    list.filter(all_headings, fn(entry) {
+      let #(level, _, _) = entry
+      level == 2 || level == 3 || level == 4
+    })
+  build_toc_tree(toc_headings)
+}
+
+/// Parse `<hN id="...">Title</hN>` tags out of rendered HTML. Returns a flat
+/// list of `(level, id, title)` triples in document order. Non-heading pieces
+/// produced by splitting on `<h` (e.g. `<hr />`'s `r />...`, `<header>`'s
+/// `eader>...`) fail the level-digit or `id="` lookups and are dropped.
+fn parse_headings(html: String) -> List(#(Int, String, String)) {
+  html
+  |> string.split("<h")
+  |> list.filter_map(fn(piece) {
+    use #(level_ch, rest) <- result.try(string.pop_grapheme(piece))
+    use level <- result.try(int.parse(level_ch))
+    use #(after_id_open, _) <- result.try(string.split_once(rest, "id=\""))
+    use #(id, after_id_close) <- result.try(string.split_once(
+      after_id_open,
+      "\"",
+    ))
+    use #(_, title_with_rest) <- result.try(string.split_once(
+      after_id_close,
+      ">",
+    ))
+    use #(title, _) <- result.try(string.split_once(title_with_rest, "</h"))
+    let clean_title = title |> strip_html_tags
+    Ok(#(level, id, clean_title))
   })
 }
 
-/// Convert a heading title to a URL-safe slug. Matches the algorithm used by
-/// `add_heading_ids` so the TOC entry's `id` is identical to the `id`
-/// attribute mork's HTML output is post-processed to carry: lowercase the
-/// text, convert spaces/dashes/underscores to `-`, and drop common punctuation
+/// Build a nested `TocEntry` tree from a flat list of `(level, id, title)`
+/// triples. Headings at the minimum level present become top-level entries;
+/// each heading's children are the consecutive deeper-level headings that
+/// follow it, up to the next heading at the same or shallower level.
+fn build_toc_tree(headings: List(#(Int, String, String))) -> List(TocEntry) {
+  case headings {
+    [] -> []
+    [first, ..] -> {
+      let #(first_level, _, _) = first
+      build_at_level(headings, first_level)
+    }
+  }
+}
+
+/// Process `headings` at `level`, returning a list of `TocEntry`. Each entry
+/// at `level` consumes the following deeper-level headings as its children
+/// (recursively built via `build_at_level` at the child's level), stopping at
+/// the next heading at `level` or shallower.
+fn build_at_level(
+  headings: List(#(Int, String, String)),
+  level: Int,
+) -> List(TocEntry) {
+  case headings {
+    [] -> []
+    [#(lvl, id, title), ..rest] if lvl == level -> {
+      let #(children_headings, siblings) = take_until_at_or_below(rest, level)
+      let children = case children_headings {
+        [] -> []
+        [#(child_level, _, _), ..] ->
+          build_at_level(children_headings, child_level)
+      }
+      let entry = TocEntry(id: id, title: title, children: children)
+      [entry, ..build_at_level(siblings, level)]
+    }
+    // A shallower heading ends this level (its parent will handle it);
+    // a deeper heading with no preceding peer at this level is skipped.
+    [#(lvl, _, _), ..] if lvl < level -> []
+    [_, ..rest] -> build_at_level(rest, level)
+  }
+}
+
+/// Split `headings` at the first entry whose level is `<= level`, returning
+/// the deeper-level run (children) and the remainder (siblings). Used by
+/// `build_at_level` to carve out a heading's subtree.
+fn take_until_at_or_below(
+  headings: List(#(Int, String, String)),
+  level: Int,
+) -> #(List(#(Int, String, String)), List(#(Int, String, String))) {
+  case headings {
+    [] -> #([], [])
+    [#(lvl, _, _), ..] if lvl <= level -> #([], headings)
+    [h, ..rest] -> {
+      let #(children, siblings) = take_until_at_or_below(rest, level)
+      #([h, ..children], siblings)
+    }
+  }
+}
+
+/// First pass of heading-id generation: lowercase the text, convert
+/// spaces/dashes/underscores to `-`, and drop common punctuation
 /// (`. , : ? ! ( ) ' "`). Every other grapheme — including CJK characters,
-/// letters, and numbers — is kept verbatim. Modern browsers resolve URL
-/// fragments containing CJK characters fine, so headings like `## 简介` or
-/// `## 導入` produce non-empty slugs (`简介`, `導入`) that the TOC's `#id`
-/// anchors can resolve. This mirrors the algorithm used by `add_heading_ids`
-/// so the TOC entry's `id` is identical to the `id` attribute mork's HTML
-/// output is post-processed to carry.
+/// letters, and numbers — is kept verbatim. The result is then handed to
+/// `needs_fallback_id`: if it's empty, all hyphens, or contains any non-ASCII
+/// character (e.g. `## 简介` → `简介`), `add_heading_ids` discards it and
+/// substitutes a sequential `heading-N` id instead. Bare CJK ids would
+/// otherwise break TOC navigation — browsers percent-encode the `#fragment`
+/// of a `#简介` link to `#%E7%AE%80%E4%BB%8B…`, which then fails to match an
+/// `id="简介"` attribute — so we fall back to ASCII-only ids that always agree
+/// between the `id` attribute and the TOC's `#id` anchor.
 fn slugify(text: String) -> String {
   text
   |> string.lowercase()
@@ -310,52 +399,136 @@ fn strip_html_tags(html: String) -> String {
 /// heading tags. mork only emits `id`s when its `heading_ids` option is
 /// enabled (and arata leaves it off), so we add them ourselves at load time.
 /// The id is the slugified plain-text content of the heading (after stripping
-/// any nested inline tags), matching `extract_toc`'s slugify so the TOC's
-/// `#id` anchors resolve to the right heading.
+/// any nested inline tags). Headings whose slug is empty, all hyphens, or
+/// contains non-ASCII characters (e.g. CJK titles like `## 简介`) get a
+/// sequential fallback id `heading-1`, `heading-2`, … instead — see
+/// `slugify` for why. `extract_toc_from_html` reads the ids back off the
+/// rendered HTML, so TOC anchors always match.
 ///
 /// The parser is intentionally simple: it splits the HTML on `<h`, then for
 /// each piece starting with `1>`–`6>` (i.e. an `<hN>` opening tag with no
 /// attributes — mork's default output), it extracts the heading text up to
 /// the matching `</h`, slugifies the stripped text, and rebuilds the tag as
 /// `<hN id="slug">…</hN>`. Pieces that don't start with a heading level
-/// (e.g. `<header>`, `<hr />`) are left untouched.
+/// (e.g. `<header>`, `<hr />`) are left untouched. A running counter tracks
+/// the next sequential fallback number; it only advances when a fallback id
+/// is actually assigned.
 fn add_heading_ids(html: String) -> String {
   let pieces = string.split(html, "<h")
   case pieces {
     [] -> html
     [first, ..rest] -> {
-      let processed = list.map(rest, add_id_to_heading_piece)
-      string.join([first, ..processed], "<h")
+      let #(processed, _next_counter) =
+        list.fold(rest, #([], 1), fn(acc, piece) {
+          let #(acc_list, counter) = acc
+          let #(new_piece, next_counter) =
+            add_id_to_heading_piece(piece, counter)
+          #([new_piece, ..acc_list], next_counter)
+        })
+      string.join([first, ..list.reverse(processed)], "<h")
     }
   }
 }
 
 /// Process one piece produced by splitting HTML on `<h`. A heading piece
 /// looks like `2>Title</h2>\n…`; a non-heading piece (e.g. from `<header>`)
-/// looks like `eader>…</header>…`. We only rewrite the former.
-fn add_id_to_heading_piece(piece: String) -> String {
+/// looks like `eader>…</header>…`. We only rewrite the former, returning
+/// `#(rewritten_piece, next_counter)`. `next_counter` is the next sequential
+/// fallback number to hand to the following heading — it advances by one only
+/// when this heading needed a fallback id (`heading-{counter}`); otherwise it
+/// stays put so the ASCII slugs don't burn numbers.
+fn add_id_to_heading_piece(piece: String, counter: Int) -> #(String, Int) {
   let levels = ["1>", "2>", "3>", "4>", "5>", "6>"]
   let is_heading = list.any(levels, fn(lv) { string.starts_with(piece, lv) })
   case is_heading {
-    False -> piece
+    False -> #(piece, counter)
     True ->
       case string.split_once(piece, ">") {
         Ok(#(opening, rest)) ->
           case string.split_once(rest, "</h") {
             Ok(#(title, after_close)) -> {
               let slug = title |> strip_html_tags |> slugify
-              opening
-              <> " id=\""
-              <> slug
-              <> "\">"
-              <> title
-              <> "</h"
-              <> after_close
+              let #(final_id, next_counter) = case needs_fallback_id(slug) {
+                True -> #("heading-" <> int.to_string(counter), counter + 1)
+                False -> #(slug, counter)
+              }
+              #(
+                opening
+                  <> " id=\""
+                  <> final_id
+                  <> "\">"
+                  <> title
+                  <> "</h"
+                  <> after_close,
+                next_counter,
+              )
             }
-            Error(_) -> piece
+            Error(_) -> #(piece, counter)
           }
-        Error(_) -> piece
+        Error(_) -> #(piece, counter)
       }
+  }
+}
+
+/// Whether a slugified heading needs the sequential `heading-N` fallback.
+/// True when the slug is empty, all hyphens, or contains any character outside
+/// ASCII lowercase letters, digits, and hyphens (e.g. CJK graphemes, which
+/// `slugify` leaves verbatim).
+fn needs_fallback_id(slug: String) -> Bool {
+  case slug {
+    "" -> True
+    _ -> {
+      let graphemes = string.to_graphemes(slug)
+      let has_non_ascii =
+        list.any(graphemes, fn(ch) { !is_ascii_slug_char(ch) })
+      let all_hyphens = list.all(graphemes, fn(ch) { ch == "-" })
+      has_non_ascii || all_hyphens
+    }
+  }
+}
+
+/// Whether a grapheme is an ASCII lowercase letter, digit, or hyphen — the
+/// only characters a browser-safe URL fragment slug should contain.
+fn is_ascii_slug_char(ch: String) -> Bool {
+  case ch {
+    "a"
+    | "b"
+    | "c"
+    | "d"
+    | "e"
+    | "f"
+    | "g"
+    | "h"
+    | "i"
+    | "j"
+    | "k"
+    | "l"
+    | "m"
+    | "n"
+    | "o"
+    | "p"
+    | "q"
+    | "r"
+    | "s"
+    | "t"
+    | "u"
+    | "v"
+    | "w"
+    | "x"
+    | "y"
+    | "z"
+    | "0"
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "-" -> True
+    _ -> False
   }
 }
 
