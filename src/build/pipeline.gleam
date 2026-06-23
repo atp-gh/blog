@@ -17,6 +17,7 @@
 import build/feeds
 import build/llms
 import build/robots
+import config
 import content/loader
 import data/link.{type Link}
 import data/page.{type Page}
@@ -63,7 +64,7 @@ pub fn main() -> Nil {
 
 /// Run the build pipeline, returning a result.
 pub fn run() -> Result(Nil, String) {
-  let site_meta = site.default()
+  let site_meta = config.site_meta()
   let posts = loader.load_posts()
   let projects = loader.load_projects()
   let links = loader.load_links()

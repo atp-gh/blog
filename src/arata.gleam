@@ -107,7 +107,7 @@ fn init(_flags: Nil) -> #(Model, effect.Effect(Msg)) {
     Model(
       route: initial_route,
       config: config.default(),
-      site_meta: site.default(),
+      site_meta: config.site_meta(),
       posts: [],
       projects: [],
       links: [],

@@ -8,7 +8,9 @@
 //// `static/icons/social/` — e.g. `icon: "github"` resolves to
 //// `/icons/social/github.svg`. This matches apollo's `get_url(path='icons/social/' ~ social.icon ~ '.svg')`.
 
-import data/site.{type Analytics, AnalyticsDisabled}
+import data/site.{
+  type Analytics, type SiteMeta, AnalyticsDisabled, CommentsDisabled, SiteMeta,
+}
 import gleam/list
 import gleam/option.{type Option, None}
 
@@ -77,12 +79,26 @@ pub type Config {
   )
 }
 
+/// Hardcoded default site metadata used by the build pipeline and SPA runtime.
+pub fn site_meta() -> SiteMeta {
+  SiteMeta(
+    base_url: "https://arata.example.com",
+    title: "Arata",
+    description: "Arata is a modern and minimalistic blog theme powered by Gleam and Lustre.",
+    analytics: AnalyticsDisabled,
+    comments: CommentsDisabled,
+    fediverse_creator: None,
+    rss_enabled: True,
+  )
+}
+
 /// Hardcoded default config. Replaced by JSON loading in Phase 4.
 pub fn default() -> Config {
+  let meta = site_meta()
   let rss_enabled = True
   Config(
-    title: "Arata",
-    description: "A blog built with Gleam and Lustre.",
+    title: meta.title,
+    description: meta.description,
     menu: [
       MenuItem(name: "posts", url: "/posts"),
       MenuItem(name: "projects", url: "/projects"),
@@ -126,7 +142,7 @@ pub fn default() -> Config {
 /// whatever `socials` it receives.
 fn default_socials(rss_enabled: Bool) -> List(Social) {
   let rss = case rss_enabled {
-    True -> [Social(name: "RSS", url: "/atom.xml", icon: "rss")]
+    True -> [Social(name: "RSS", url: "/rss.xml", icon: "rss")]
     False -> []
   }
   list.append(rss, [
