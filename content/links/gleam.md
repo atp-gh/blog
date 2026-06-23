@@ -1,6 +1,6 @@
 +++
 title = "Gleam"
 url = "https://gleam.run"
-description = "A typed, functional language that compiles to JavaScript and Erlang."
-image = "https://gleam.run/images/lucy/lucy.svg"
+description = "Gleam is a friendly language for building type-safe systems that scale!"
+image = "icons/social/lucy.svg"
 +++
