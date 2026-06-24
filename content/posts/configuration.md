@@ -8,7 +8,9 @@ tags = ["guide", "config"]
 
 # Configuration
 
-arata is configured through Gleam modules. The important split is:
+Arata is configured through Gleam modules.
+
+The important splits are:
 
 * **`src/config.gleam`** — the user-facing configuration source:
   `Config`, `config.default()`, and `config.site_meta()`.
@@ -363,10 +365,10 @@ The statistics are computed from the already-loaded runtime content model:
 * `link_count` is based on loaded friend links.
 * `project_count` is based on loaded projects.
 
-aratafetch does not currently display comment counts. External comment systems
-such as Giscus or Utterances do not provide a reliable static local count in
-arata's current data model, so comment statistics are intentionally omitted
-until a stable data source is added.
+aratafetch does not currently display comment counts.
+
+> External comment systems, such as Giscus or Utterances do not provide a reliable static local count in
+> arata's current data model, so comment statistics are intentionally omitted until a stable data source is added.
 
 ### `analytics`
 
@@ -516,12 +518,9 @@ Frontmatter:
 ```toml
 +++
 title = "Hello, arata"
-date = "2026-01-15"
-updated = "2026-01-18"
-description = "Introducing arata."
+date = "2026-06-21"
+description = "Introducing arata project"
 tags = ["gleam", "lustre"]
-draft = false
-tldr = "One-line summary."
 +++
 ```
 
@@ -608,7 +607,7 @@ weight = 10
 
 ### Zola-compatible format
 
-arata also supports Zola-style link fields:
+Arata also supports Zola-style link fields:
 
 ```toml
 +++

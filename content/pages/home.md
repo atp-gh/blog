@@ -7,34 +7,57 @@ subtitle = "Welcome to demo site of arata"
 
 ## Features
 
-- Light, dark, and auto themes
-- [Projects page](/projects)
 - [Links page](/links)
-- MathJax rendering (configurable)
+- [About page](/about)
 - [Taxonomies](/tags)
-- Custom homepage
+- [Projects page](/projects)
+- Table of Contents
+- Remarkable performance
 - Comments (Giscus/Utterances)
-- Search functionality (searches title, description, tags, and body content)
-- File-based content model (write `.md` files, not code)
-- CSS modular loading (10 separate stylesheets)
+- MathJax rendering (configurable)
 - Mobile-responsive with hamburger menu
+- Custom homepage (Just you're looking at)
+- CSS modular loading (10 separate stylesheets)
+- Light, dark, and auto themes, swithing by one botton
+- File-based content model (write `.md` files, parser at building)
+- Search functionality (title, description, tags, and body content)
+- More features ✨ you could explore by your self
 
 ## Quick Start
 
-1. **Scaffold the project:**
+1. **Prepare environment**
+
+- [Gleam](https://github.com/gleam-lang/gleam)
+- [Bun](https://github.com/oven-sh/bun)
+
+2. **Clone the project**
 
 ```shell
-gleam new my-blog --template javascript
-cd my-blog
-gleam add lustre modem mork
+git clone https://github.com/yonzilch/arata.git
+
+cd arata
 ```
 
-2. **Build the site:**
+3. **Build the site**
 
 ```shell
 gleam run -m build/pipeline
 ```
 
-3. **Write content** as markdown files in `content/posts/`, `content/pages/`, `content/links/`, and `content/projects/`.
+4. **Write content as markdown files in**
+```
+content/posts/
+content/pages/
+content/links/
+content/projects/
+```
 
-Checkout the [configuration guide](/posts/configuration) and the [example posts](/posts).
+5. **Configure and publish your site**
+
+Checkout the [configuration guide](/posts/configuration) and the [deployment guide](/posts/deployment).
+
+---
+
+**[root@arata:~]# aratafetch**
+
+**>**
