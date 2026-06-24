@@ -2,8 +2,16 @@
 //// apollo's `templates/cards.html` per-card structure.
 ////
 //// Each card optionally shows media (image), a title (linked externally via
-//// `link_to` or internally to `/{slug}`), a tagline description, and a footer
-//// with GitHub/Demo icon-buttons and `#tag` chips.
+//// `link_to` or internally to `/{slug}`), decorative `#tag` chips, a tagline
+//// description, and a footer with GitHub/GitLab/Codeberg/Forgejo/Demo
+//// icon-buttons.
+////
+//// Layout invariant:
+////   card-title -> card-tags -> card-tagline -> card-footer
+////
+//// Tags are intentionally rendered as their own row between title and
+//// tagline. Keeping tags out of `.card-footer` prevents them from competing
+//// with icon-buttons for horizontal space on narrow screens.
 
 import data/project.{type Project}
 import gleam/list
@@ -19,6 +27,7 @@ pub fn view(project: Project) -> Element(msg) {
     view_media(project.image, project.title),
     html.div([attribute.class("card-content")], [
       html.h1([attribute.class("card-title")], [view_title(project)]),
+      view_tags(project.tags),
       view_tagline(project.description),
       view_footer(project),
     ]),
@@ -36,6 +45,7 @@ fn view_media(image: Option(String), alt: String) -> Element(msg) {
           attribute.src(src),
         ]),
       ])
+
     option.None -> none()
   }
 }
@@ -51,12 +61,32 @@ fn view_title(project: Project) -> Element(msg) {
           attribute.target("_blank"),
           attribute.rel("noopener"),
         ],
-        [
-          html.text(project.title),
-        ],
+        [html.text(project.title)],
       )
+
     option.None ->
-      html.a([attribute.href("/" <> project.slug)], [html.text(project.title)])
+      html.a([attribute.href("/" <> project.slug)], [
+        html.text(project.title),
+      ])
+  }
+}
+
+/// The `#tag` chips, capped at 4.
+///
+/// Tags are decorative, not links, matching apollo's card tag behavior.
+/// They are rendered as a standalone row between title and tagline so they
+/// wrap cleanly on narrow screens.
+fn view_tags(tags: List(String)) -> Element(msg) {
+  case tags {
+    [] -> none()
+
+    _ ->
+      html.div(
+        [attribute.class("card-tags")],
+        list.map(list.take(tags, 4), fn(tag) {
+          html.span([attribute.class("card-tag")], [html.text("#" <> tag)])
+        }),
+      )
   }
 }
 
@@ -64,12 +94,13 @@ fn view_title(project: Project) -> Element(msg) {
 fn view_tagline(description: String) -> Element(msg) {
   case description {
     "" -> none()
+
     _ -> html.p([attribute.class("card-tagline")], [html.text(description)])
   }
 }
 
-/// The card footer: GitHub/GitLab/Codeberg/Forgejo/Demo icon-buttons and tag
-/// chips. Shown only when the project has at least one of these.
+/// The card footer: GitHub/GitLab/Codeberg/Forgejo/Demo icon-buttons only.
+/// Shown only when the project has at least one configured link.
 fn view_footer(project: Project) -> Element(msg) {
   let links =
     view_links(
@@ -79,19 +110,19 @@ fn view_footer(project: Project) -> Element(msg) {
       project.forgejo,
       project.demo,
     )
-  let tags = view_tags(project.tags)
-  case list.is_empty(links) && tags == none() {
+
+  case list.is_empty(links) {
     True -> none()
+
     False ->
       html.div([attribute.class("card-footer")], [
         html.div([attribute.class("card-links")], links),
-        tags,
       ])
   }
 }
 
 /// The GitHub, GitLab, Codeberg, Forgejo, and Demo icon-buttons, if their URLs
-/// are set (Fix 13 added gitlab/codeberg/forgejo).
+/// are set.
 fn view_links(
   github: Option(String),
   gitlab: Option(String),
@@ -103,42 +134,26 @@ fn view_links(
     option.Some(url) -> [icon_button.view(url, "GitHub", "github")]
     option.None -> []
   }
+
   let gl = case gitlab {
     option.Some(url) -> [icon_button.view(url, "GitLab", "gitlab")]
     option.None -> []
   }
+
   let cb = case codeberg {
     option.Some(url) -> [icon_button.view(url, "Codeberg", "codeberg")]
     option.None -> []
   }
+
   let fj = case forgejo {
     option.Some(url) -> [icon_button.view(url, "Forgejo", "forgejo")]
     option.None -> []
   }
+
   let dm = case demo {
     option.Some(url) -> [icon_button.view(url, "Demo", "globe")]
     option.None -> []
   }
+
   list.flatten([gh, gl, cb, fj, dm])
-}
-
-/// The `#tag` chips, capped at 4 (apollo slices to 4). Each is a
-/// `<span class="card-tag">` (not a link — apollo's card tags are decorative).
-fn view_tags(tags: List(String)) -> Element(msg) {
-  case tags {
-    [] -> none()
-    _ ->
-      html.div([attribute.class("card-tags")], [
-        list.map(list.take(tags, 4), fn(tag) {
-          html.span([attribute.class("card-tag")], [html.text("#" <> tag)])
-        })
-        |> element_fragment,
-      ])
-  }
-}
-
-/// Wrap a list of elements into a single Element via a fragment, so the
-/// tag chips sit as siblings inside `.card-tags`.
-fn element_fragment(children: List(Element(msg))) -> Element(msg) {
-  html.div([], children)
 }
