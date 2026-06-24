@@ -1,19 +1,50 @@
 //// Markdown rendering: converts markdown strings to HTML using the mork
-//// parser (a pure-Gleam CommonMark + GFM implementation).
+//// parser.
 ////
-//// This replaces the pre-rendered HTML bodies in the sample content with
-//// real markdown strings that are parsed at render time. This is the
-//// foundation for the future content pipeline (ROADMAP Phase 17), where
-//// posts will be loaded from `.md` files.
+//// arata parses Markdown at build time, not in the browser. The resulting HTML
+//// is stored in `dist/content_index.json` and rendered by the SPA through
+//// `unsafe_raw_html`.
 ////
-//// Usage:
-////   let html = markdown.to_html("# Hello\n\nWorld")
-////   // => "<h1>Hello</h1>\n<p>World</p>"
+//// Important:
+//// mork's extended Markdown features are opt-in. Using `mork.parse/1` only
+//// parses the default CommonMark subset, so GFM tables like:
+////
+////   | Left | Right |
+////   | ---- | ----- |
+////   | foo  | bar   |
+////
+//// would be treated as a plain paragraph. We use `parse_with_options` with
+//// `tables: True` so table blocks become real `<table>` HTML.
+////
+//// We intentionally keep `heading_ids: False` because arata adds heading IDs
+//// later in `content/loader.gleam` via `add_heading_ids`. Enabling mork's
+//// heading IDs here would risk duplicate/conflicting IDs.
+////
+//// We also keep `strip_frontmatter: False` because arata already splits TOML
+//// frontmatter (`+++ ... +++`) before calling this module.
 
 import mork
+import mork/document.{type Options, Options}
 
-/// Convert a markdown string to HTML. Returns the HTML string.
+/// Convert a Markdown string to HTML.
 pub fn to_html(markdown: String) -> String {
-  let ast = mork.parse(markdown)
+  let ast =
+    mork.parse_with_options(options: markdown_options(), input: markdown)
+
   mork.to_html(ast)
+}
+
+/// Markdown extension options used by arata.
+///
+/// Keep this centralized so all Markdown rendering paths behave consistently.
+fn markdown_options() -> Options {
+  Options(
+    strip_frontmatter: False,
+    footnotes: True,
+    heading_ids: False,
+    tables: True,
+    tasklists: True,
+    emojis: True,
+    autolinks: True,
+  )
 }

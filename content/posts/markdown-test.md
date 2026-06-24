@@ -64,6 +64,14 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sed mollis augue
 
 ---
 
+## Tables
+
+| Left columns  | Right columns |
+| ------------- |:-------------:|
+| left foo      | right foo     |
+| left bar      | right bar     |
+| left baz      | right baz     |
+
 ## Table Inline Markdown
 
 | Italics   | Bold     | Code   | StrikeThrough     |
