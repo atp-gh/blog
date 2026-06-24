@@ -3,16 +3,16 @@ title = "Configuration"
 date = "2026-06-24"
 updated = "2026-06-23"
 description = "Comprehensive configuration guide for arata."
-tags = ["guide", "config"]
+tags = \["guide", "config"]
 +++
 
 # Configuration
 
 arata is configured through Gleam modules. The important split is:
 
-- **`src/config.gleam`** — the user-facing configuration source:
+* **`src/config.gleam`** — the user-facing configuration source:
   `Config`, `config.default()`, and `config.site_meta()`.
-- **`src/data/site.gleam`** — shared metadata types only:
+* **`src/data/site.gleam`** — shared metadata types only:
   `SiteMeta`, `Analytics`, and `CommentsConfig`.
 
 `config.gleam` is the single place where default site values live. The SPA
@@ -28,7 +28,7 @@ The build pipeline:
 
 ```sh
 gleam run -m build/pipeline
-````
+```
 
 reads Markdown files from `content/`, parses TOML frontmatter with `tom`,
 renders Markdown bodies with <https://hex.pm/packages/mork>, writes
@@ -299,6 +299,75 @@ When `True`, post pages render the floating ToC/tags button and overlay.
 
 When `False`, the floating button and overlay are omitted.
 
+### `aratafetch_enabled` and `aratafetch_maintain_for`
+
+`aratafetch` is an optional neofetch-style homepage summary block. When
+enabled, it is rendered at the bottom of the homepage content, after the
+Markdown body from `content/pages/home.md`.
+
+It gives visitors a compact ASCII-style overview of the site, including:
+
+* site title
+* published post count
+* total word count
+* unique tag count
+* friend link count
+* project count
+* optional maintenance display string
+
+Example configuration:
+
+```gleam
+Config(
+  // ...
+  floating_buttons_enabled: True,
+  aratafetch_enabled: True,
+  aratafetch_maintain_for: Some("since 2024-06-23"),
+)
+```
+
+Disable it with:
+
+```gleam
+aratafetch_enabled: False,
+```
+
+When disabled, the homepage renders exactly as before and no aratafetch DOM is
+emitted.
+
+`aratafetch_maintain_for` is an `Option(String)` rendered as-is in the
+`maintained` row.
+
+Examples:
+
+```gleam
+aratafetch_maintain_for: Some("since 2026-06-21")
+```
+
+```gleam
+aratafetch_maintain_for: Some("2 years")
+```
+
+```gleam
+aratafetch_maintain_for: None
+```
+
+When `None`, the `maintained` row displays `n/a`.
+
+The statistics are computed from the already-loaded runtime content model:
+
+* `post_count` counts published posts only.
+* draft posts are excluded.
+* `word_count` sums `Post.word_count`.
+* `tag_count` counts unique tags case-insensitively.
+* `link_count` is based on loaded friend links.
+* `project_count` is based on loaded projects.
+
+aratafetch does not currently display comment counts. External comment systems
+such as Giscus or Utterances do not provide a reliable static local count in
+arata's current data model, so comment statistics are intentionally omitted
+until a stable data source is added.
+
 ### `analytics`
 
 One of:
@@ -321,7 +390,7 @@ Example:
 ```gleam
 pub fn site_meta() -> SiteMeta {
   SiteMeta(
-    base_url: "https://example.com",
+    base_url: "https://blog.example.com",
     title: "Yon Zilch",
     description: "This is Yonzilch's blog",
     analytics: AnalyticsDisabled,
@@ -736,8 +805,6 @@ for inspection and debugging.
 However, for performance, the SPA shell no longer references each file with
 render-blocking `<link rel="stylesheet">` tags. Instead, the build pipeline
 inlines the CSS modules into `index.html` and `404.html` inside:
-
-
 
 This removes the previous render-blocking request chain for:
 
