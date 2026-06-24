@@ -108,7 +108,7 @@
 
 :root {
     /* Fonts */
-    --font-size-base: 17px;
+    --font-size-base: 18.5px;
     /* Fix 9b: default the monospace families to the system stack so the
      browser uses the OS's native monospace (e.g. SF Mono on macOS, Cascadia
      Code on Windows) instead of loading the bundled JetBrains Mono TTFs.
