@@ -15,6 +15,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## v1.4.3
+
+### Added
+
+- Added browser-friendly previews for generated Atom and RSS feeds.
+  - `/atom.xml` now references `atom.xsl`.
+  - `/rss.xml` now references `rss.xsl`.
+  - Opening feed URLs directly in a browser now shows a readable HTML preview
+    instead of raw XML.
+  - Feed previews include site title, description, feed URL, expandable entries,
+    and total entry count.
+
+### Changed
+
+- Hid the URL scheme in aratafetch's `base_url` row for cleaner terminal-style
+  output, while preserving the canonical configured URL for feeds, sitemap, and
+  other build outputs.
+
+- Updated the build pipeline to emit feed XSL stylesheets when RSS is enabled.
+  - `dist/atom.xsl`
+  - `dist/rss.xsl`
+
+- Feed stylesheet URLs are now resolved through `Config.base_path`.
+  - Root deployments use paths such as `/atom.xsl`.
+  - Subdirectory deployments use paths such as `/arata/atom.xsl`.
+
+- Feed previews use self-contained inline styling.
+  - No external CSS dependency is required.
+  - Browser rendering works independently of the SPA bundle.
+
+### Fixed
+
+- Canonicalized `SiteMeta.base_url` at the configuration boundary.
+  - Trailing slash variants such as
+    `https://yonzilch.github.io/arata/` now normalize to
+    `https://yonzilch.github.io/arata`.
+  - This keeps `base_path`, SPA shell paths, runtime metadata, feeds, sitemap,
+    robots output, and LLM output aligned.
+
+- Hardened feed and sitemap URL generation.
+  - Prevents malformed URLs such as `https://example.com//rss.xml`.
+  - Applies defensive URL joins in feed/sitemap output even if a non-canonical
+    `base_url` is passed in directly.
+
+### Tests
+
+- Updated feed tests for the new XSL-aware feed generator API.
+- Added coverage for XML stylesheet processing instructions.
+- Added coverage for omitted stylesheet instructions when no XSL href is passed.
+- Preserved existing feed, sitemap, and XML escaping coverage.
+
+### Internal
+
+- Added `src/build/feeds_style.gleam` for feed preview stylesheets.
+- Updated `src/build/feeds.gleam` to support optional XSL stylesheet hints.
+- Updated `src/build/pipeline.gleam` to write feed XML and feed XSL files
+  together when RSS is enabled.
+- Updated `src/config.gleam` to normalize `base_url` earlier and more
+  consistently.
+
+---
+
 ## [v1.4.2] — 2026-06-26
 
 ### Added
