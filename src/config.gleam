@@ -121,7 +121,7 @@ pub type Config {
 /// This prevents drift between `base_path`, feed URLs, sitemap URLs, robots.txt,
 /// llms.txt, the SPA shell, and runtime content metadata.
 pub fn site_meta() -> SiteMeta {
-  let base_url = canonical_base_url("https://yonzilch.github.io/")
+  let base_url = canonical_base_url("https://arata.yon.im")
 
   SiteMeta(
     base_url: base_url,
