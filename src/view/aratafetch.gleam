@@ -129,7 +129,7 @@ fn render(stats: Stats) -> String {
       positive_row("projects", stats.project_count),
       positive_row("tags", stats.tag_count),
       text_row("site_title", stats.site_title),
-      text_row("base_url", stats.base_url),
+      text_row("base_url", display_base_url(stats.base_url)),
       text_row("description", stats.description),
       optional_row("maintain", stats.maintain_for),
     ]),
@@ -167,5 +167,32 @@ fn repeat(chunk: String, times: Int) -> String {
     True -> ""
 
     False -> chunk <> repeat(chunk, times - 1)
+  }
+}
+
+fn display_base_url(url: String) -> String {
+  url
+  |> strip_url_scheme
+  |> trim_trailing_slash
+}
+
+fn strip_url_scheme(url: String) -> String {
+  case string.split_once(url, "://") {
+    Ok(#(_scheme, rest)) -> rest
+    Error(_) -> url
+  }
+}
+
+fn trim_trailing_slash(url: String) -> String {
+  case string.ends_with(url, "/") {
+    True -> {
+      let size = string.length(url)
+
+      url
+      |> string.slice(0, size - 1)
+      |> trim_trailing_slash
+    }
+
+    False -> url
   }
 }
