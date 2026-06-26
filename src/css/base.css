@@ -368,6 +368,14 @@ del {
     padding: 0.95rem 0;
 }
 
+.home-latest-post {
+    overflow: hidden;
+}
+
+.home-latest-post-date {
+    white-space: nowrap;
+}
+
 .home-latest-post-date::after {
     content: "";
     display: inline-block;
@@ -386,7 +394,12 @@ del {
 }
 
 .home-latest-post-title {
-    display: inline-block;
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
     text-decoration: none;
     color: inherit;
     font-size: 1rem;
@@ -402,6 +415,10 @@ del {
 
 .home-latest-post-meta {
     margin-top: 0.32rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
     font-size: 0.9rem;
     line-height: 1.4;
     color: var(--text-color-muted);
