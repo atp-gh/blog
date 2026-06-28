@@ -1,7 +1,7 @@
 +++
 title = "Configuration"
 date = "2026-06-23"
-updated = "2026-06-24"
+updated = "2026-06-29"
 description = "Comprehensive configuration guide for arata."
 tags = ["guide", "config"]
 +++
@@ -1045,16 +1045,24 @@ when the operating system theme changes.
 
 ### Accent color
 
-The accent color is defined in `src/css/base.css`:
+Accent colors are defined in `src/css/theme.css`.
+
+Arata uses separate light and dark accent values so the accent stays readable
+across both themes:
 
 ```css
 :root {
-  --primary-color: #3555b3;
+  --primary-color: #2f4fa3;
 }
-```
 
-Change this variable to recolor links, active nav states, tags, heading
-prefixes, selection highlights, and other accent surfaces.
+:root.dark {
+  --primary-color: #5f7eea;
+}
+````
+
+Change these variables to recolor links, active nav states, tags, heading
+prefixes, selection highlights, blockquote accents, card hover borders, and
+other accent surfaces.
 
 ## CSS
 
@@ -1067,15 +1075,22 @@ src/css/
 Current modules:
 
 ```txt
-base.css
+fonts.css
+theme.css
+globals.css
+typography.css
+home.css
 layout.css
 components.css
+pagination.css
 post.css
 cards.css
 links.css
 search.css
 toc.css
 syntax.css
+lightbox.css
+aratafetch.css
 accessibility.css
 ```
 
@@ -1089,20 +1104,28 @@ for inspection and debugging.
 
 However, for performance, the SPA shell no longer references each file with
 render-blocking `<link rel="stylesheet">` tags. Instead, the build pipeline
-inlines the CSS modules into `index.html` and `404.html` inside:
+inlines the CSS modules into `index.html` and `404.html` inside a `<style>`
+block.
 
 This removes the previous render-blocking request chain for:
 
 ```txt
-/css/base.css
+/css/fonts.css
+/css/theme.css
+/css/globals.css
+/css/typography.css
+/css/home.css
 /css/layout.css
 /css/components.css
+/css/pagination.css
 /css/post.css
 /css/cards.css
 /css/links.css
 /css/search.css
 /css/toc.css
 /css/syntax.css
+/css/lightbox.css
+/css/aratafetch.css
 /css/accessibility.css
 ```
 
@@ -1111,19 +1134,37 @@ This removes the previous render-blocking request chain for:
 CSS module order matters:
 
 ```txt
-base
+fonts
+theme
+globals
+typography
+home
 layout
 components
+pagination
 post
 cards
 links
 search
 toc
 syntax
+lightbox
+aratafetch
 accessibility
 ```
 
-`base.css` must come first because it defines theme variables and resets.
+`fonts.css` must come first because it declares bundled font faces.
+
+`theme.css` must be loaded before every module that uses CSS variables.
+
+`globals.css` sets document-level defaults and responsive root scaling.
+
+`typography.css` defines global heading, link, selection, separator, time,
+deletion, and MathJax overflow behavior.
+
+`home.css` comes after `typography.css` so homepage latest-post styles can
+override global link hover behavior.
+
 `accessibility.css` should come last because it contains focus-visible and
 accessibility overrides.
 
