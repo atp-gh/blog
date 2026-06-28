@@ -1,7 +1,7 @@
 +++
 title = "CHANGELOG"
 date = "2026-06-21"
-updated = "2026-06-26"
+updated = "2026-06-29"
 description = "Comprehensive CHANGELOG of arata project"
 tags = ["docs"]
 +++
@@ -12,6 +12,75 @@ All notable changes to arata are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## v1.5.0 — [2026-06-29]
+
+### Changed
+
+- Split the former monolithic `src/css/base.css` into focused CSS modules:
+  - `fonts.css`
+  - `theme.css`
+  - `globals.css`
+  - `typography.css`
+  - `home.css`
+- Extracted additional component-specific styles into dedicated modules:
+  - `pagination.css`
+  - `lightbox.css`
+  - `aratafetch.css`
+- Updated the build pipeline CSS order to inline the new module sequence:
+  - `fonts`
+  - `theme`
+  - `globals`
+  - `typography`
+  - `home`
+  - `layout`
+  - `components`
+  - `pagination`
+  - `post`
+  - `cards`
+  - `links`
+  - `search`
+  - `toc`
+  - `syntax`
+  - `lightbox`
+  - `aratafetch`
+  - `accessibility`
+- Updated CSS documentation in `README.md` and `content/posts/configuration.md`.
+- Documented theme-specific accent colors in `src/css/theme.css`.
+- Moved accent color configuration docs from `base.css` to `theme.css`.
+
+### Improved
+
+- Improved homepage latest-post styling:
+  - latest posts now render as compact cards
+  - card width is aligned with the aratafetch block
+  - titles can wrap instead of being truncated with an ellipsis
+  - global link hover styles no longer leak into latest-post titles
+- Improved aratafetch layout so it visually aligns with homepage latest-post cards.
+- Improved post list card layout and spacing.
+- Improved mobile post list behavior by resetting the generated `<ul>` through `.post-list-items`.
+- Improved blockquote readability with:
+  - theme-aware text color
+  - subtle background
+  - better spacing
+  - left accent border
+  - rounded right corners
+  - normalized inner paragraph margins
+
+### Fixed
+
+- Fixed post cards appearing offset on small screens due to default browser `<ul>` padding.
+- Fixed homepage latest-post title styling conflicts with global link hover rules.
+- Fixed outdated CSS module references in documentation.
+- Fixed outdated accent color documentation that still pointed to `src/css/base.css`.
+
+### Internal
+
+- Added `.post-list-items` to the post list view so list spacing can be targeted directly.
+- Removed `src/css/base.css`.
+- Added `--text-color-muted` as a theme-level alias.
+- Preserved `accessibility.css` as the final CSS module so focus and accessibility overrides remain authoritative.
+- Kept CSS modules copied to `dist/css/` for inspection while continuing to inline them into `index.html` and `404.html`.
 
 ---
 
@@ -115,9 +184,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     ```
 
   - Added support for rendering site metadata rows such as:
-    - `site_title`
-    - `base_url`
-    - `description`
+  1. `site_title`
+  2. `base_url`
+  3. `description`
   - Updated row order to match the current compact output:
 
     ```txt
@@ -133,9 +202,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     ```
 
   - Omitted unavailable rows:
-    - numeric rows are hidden when their value is `0`
-    - text rows are hidden when empty
-    - optional rows are hidden when `None`
+  1. numeric rows are hidden when their value is `0`
+  2. text rows are hidden when empty
+  3. optional rows are hidden when `None`
 
 - Updated `aratafetch` styling so it appears as a compact floating terminal window.
   - The block now shrink-wraps its content instead of stretching across the full page width.
@@ -227,9 +296,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added page-local gallery navigation.
   - Supports previous/next navigation.
   - Supports keyboard controls:
-    1. `Escape` closes the lightbox.
-    2. `ArrowLeft` moves to the previous image.
-    3. `ArrowRight` moves to the next image.
+  1. `Escape` closes the lightbox.
+  2. `ArrowLeft` moves to the previous image.
+  3. `ArrowRight` moves to the next image.
   - Includes image counter and caption display.
 
 - Added mobile-friendly lightbox controls.
