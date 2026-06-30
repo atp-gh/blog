@@ -121,12 +121,12 @@ pub type Config {
 /// This prevents drift between `base_path`, feed URLs, sitemap URLs, robots.txt,
 /// llms.txt, the SPA shell, and runtime content metadata.
 pub fn site_meta() -> SiteMeta {
-  let base_url = canonical_base_url("https://arata.yon.im")
+  let base_url = canonical_base_url("https://blog.0pt.icu")
 
   SiteMeta(
     base_url: base_url,
-    title: "Arata",
-    description: "A modern and minimalistic blog theme",
+    title: "ATP",
+    description: "This is Atp's blog",
     analytics: AnalyticsDisabled,
     comments: CommentsDisabled,
     fediverse_creator: None,
@@ -148,7 +148,7 @@ pub fn default() -> Config {
       MenuItem(name: "about", url: with_base_path(base_path, "/about")),
       MenuItem(name: "links", url: with_base_path(base_path, "/links")),
       MenuItem(name: "posts", url: with_base_path(base_path, "/posts")),
-      MenuItem(name: "projects", url: with_base_path(base_path, "/projects")),
+      // MenuItem(name: "projects", url: with_base_path(base_path, "/projects")),
       MenuItem(name: "tags", url: with_base_path(base_path, "/tags")),
     ],
     // The RSS social link is only added when `rss_enabled` is `True`. Fix
@@ -176,12 +176,15 @@ pub fn default() -> Config {
     ),
     search_enabled: True,
     navbar_fixed: True,
-    analytics: AnalyticsDisabled,
+    analytics: site.Umami(
+      website_id: "db91a9df-01cd-4d4c-9a58-46f63001928d",
+      host_url: "https://umami.0pt.dpdns.org",
+    ),
     mathjax_enabled: True,
     sidebar_enabled: True,
     floating_buttons_enabled: True,
     aratafetch_enabled: True,
-    aratafetch_maintained_for: Some("since 2026-06-21"),
+    aratafetch_maintained_for: Some("since 2023-07-15"),
     lightbox_enabled: True,
     latest_posts_enabled: False,
     latest_posts_count: 5,
@@ -201,12 +204,12 @@ fn default_socials(rss_enabled: Bool) -> List(Social) {
   list.append(rss, [
     Social(
       name: "Codeberg",
-      url: "https://codeberg.org/yonzilch/arata",
+      url: "https://codeberg.org/antipeth",
       icon: "codeberg",
     ),
     Social(
       name: "GitHub",
-      url: "https://github.com/yonzilch/arata",
+      url: "https://github.com/atp-gh/blog",
       icon: "github",
     ),
   ])
