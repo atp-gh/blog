@@ -20,6 +20,7 @@ import gleam/option.{None, Some}
 import gleam/order.{Eq}
 import gleam/result
 import gleam/string
+import shortcodes/mermaid
 import simplifile
 import tom
 
@@ -246,7 +247,13 @@ fn load_post(path: String, filename: String) -> Result(Post, Nil) {
     Ok(t) -> Some(t)
     Error(_) -> None
   }
-  let html_body = markdown.to_html(body) |> add_heading_ids
+
+  let html_body =
+    body
+    |> expand_shortcodes
+    |> markdown.to_html
+    |> add_heading_ids
+
   let toc = extract_toc_from_html(html_body)
   let word_count = count_words(body)
   let reading_time = case word_count {
@@ -284,7 +291,11 @@ fn load_page(path: String, filename: String) -> Result(Page, Nil) {
     Ok(s) -> Some(s)
     Error(_) -> None
   }
-  let html_body = markdown.to_html(body)
+
+  let html_body =
+    body
+    |> expand_shortcodes
+    |> markdown.to_html
 
   Ok(Page(slug: slug, title: title, body: html_body, subtitle: subtitle))
 }
@@ -523,6 +534,30 @@ fn is_ascii_slug_char(ch: String) -> Bool {
     | "9"
     | "-" -> True
     _ -> False
+  }
+}
+
+fn expand_shortcodes(markdown_body: String) -> String {
+  expand_mermaid_shortcodes(markdown_body)
+}
+
+fn expand_mermaid_shortcodes(markdown_body: String) -> String {
+  case string.split_once(markdown_body, "{{ mermaid(\"") {
+    Error(_) -> markdown_body
+
+    Ok(#(before, rest)) ->
+      case string.split_once(rest, "\") }}") {
+        Error(_) -> markdown_body
+
+        Ok(#(diagram, after)) -> {
+          let rendered =
+            diagram
+            |> string.replace("\\n", "\n")
+            |> mermaid.view
+
+          before <> rendered <> expand_mermaid_shortcodes(after)
+        }
+      }
   }
 }
 

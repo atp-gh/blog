@@ -26,7 +26,12 @@ export function typeset_math() {
   // Load MathJax lazily.
   if (document.getElementById("MathJax-script")) return;
   window.MathJax = {
-    tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]] },
+    tex: {
+      inlineMath: [
+        ["$", "$"],
+        ["\\(", "\\)"],
+      ],
+    },
     startup: { typeset: false },
   };
   const script = document.createElement("script");
@@ -44,25 +49,61 @@ export function typeset_math() {
 
 export function render_mermaid(is_dark) {
   if (typeof window === "undefined") return;
-  const blocks = document.getElementsByClassName("mermaid");
-  if (blocks.length === 0) return;
 
-  // Store original innerHTML on first call so we can restore on re-render.
-  if (!mermaid_originals) {
-    mermaid_originals = [];
-    for (let i = 0; i < blocks.length; i++) {
-      mermaid_originals[i] = blocks[i].innerHTML;
-    }
-  }
+  // Wait until the SPA/Lustre has finished updating the article HTML in the DOM.
+  // Two animation frames make this more reliable after route changes or state updates.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const blocks = document.getElementsByClassName("mermaid");
 
-  import(mermaid_cdn).then((mermaid) => {
-    const theme = is_dark ? "dark" : "neutral";
-    mermaid.default.initialize({ startOnLoad: false, theme: theme });
-    // Restore original HTML and clear processed flag so mermaid re-renders.
-    for (let i = 0; i < blocks.length; i++) {
-      delete blocks[i].dataset.processed;
-      blocks[i].innerHTML = mermaid_originals[i];
-    }
-    mermaid.default.run();
+      // If there are no Mermaid blocks on the current page, do nothing.
+      if (blocks.length === 0) return;
+
+      const originals = [];
+
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+
+        // Mermaid expects the diagram source as plain text.
+        // Avoid using innerHTML because it may contain escaped entities.
+        const code =
+          block.dataset.originalCode ||
+          block.textContent ||
+          block.innerText ||
+          "";
+
+        // Store the original diagram source so it can be restored before re-rendering.
+        block.dataset.originalCode = code;
+        originals[i] = code;
+      }
+
+      import(mermaid_cdn)
+        .then((mermaid) => {
+          const theme = is_dark ? "dark" : "neutral";
+
+          // Mermaid is rendered manually because the SPA updates content dynamically.
+          mermaid.default.initialize({
+            startOnLoad: false,
+            theme: theme,
+          });
+
+          for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+
+            // Allow Mermaid to process the block again after SPA navigation or theme changes.
+            delete block.dataset.processed;
+
+            // Restore the raw diagram source as plain text before rendering.
+            // This helps avoid issues with escaped HTML entities such as &gt; or &amp;gt;.
+            block.textContent = originals[i];
+          }
+
+          // Render all Mermaid blocks currently present in the DOM.
+          mermaid.default.run();
+        })
+        .catch((err) => {
+          console.error("[arata] mermaid load/render failed", err);
+        });
+    });
   });
 }
