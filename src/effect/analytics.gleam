@@ -22,7 +22,7 @@ pub fn inject(analytics: site.Analytics) -> effect.Effect(Nil) {
   case analytics {
     site.AnalyticsDisabled -> Nil
 
-    site.Umami(src, website_id) -> {
+    site.Umami(website_id, src) -> {
       inject_umami(website_id: website_id, src: src)
 
       Nil
