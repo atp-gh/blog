@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://test.0pt.de5.net/sitemap.xml
+Sitemap: https://blog.0pt.icu/sitemap.xml

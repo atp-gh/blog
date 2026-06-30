@@ -3,91 +3,91 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>ATP</title>
     <subtitle>This is Atp&apos;s blog</subtitle>
-    <link href="https://test.0pt.de5.net/atom.xml" rel="self"/>
-    <link href="https://test.0pt.de5.net"/>
-    <id>https://test.0pt.de5.net</id>
+    <link href="https://blog.0pt.icu/atom.xml" rel="self"/>
+    <link href="https://blog.0pt.icu"/>
+    <id>https://blog.0pt.icu</id>
     <updated>2025-10-17T00:00:00Z</updated>
     <entry>
         <title>My NixOS NAS🧊 (2)</title>
-        <link href="https://test.0pt.de5.net/posts/homelab-nixos-nas-2"/>
-        <id>https://test.0pt.de5.net/posts/homelab-nixos-nas-2</id>
+        <link href="https://blog.0pt.icu/posts/homelab-nixos-nas-2"/>
+        <id>https://blog.0pt.icu/posts/homelab-nixos-nas-2</id>
         <updated>2025-10-17T00:00:00Z</updated>
         <summary>Documenting my journey of building a personal NAS using NixOS.</summary>
     </entry>
     <entry>
         <title>Sops-nix Quick Start Guide</title>
-        <link href="https://test.0pt.de5.net/posts/nixos-sops-nix-quick-start-guide"/>
-        <id>https://test.0pt.de5.net/posts/nixos-sops-nix-quick-start-guide</id>
+        <link href="https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide"/>
+        <id>https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide</id>
         <updated>2025-10-17T00:00:00Z</updated>
         <summary>A quick guide to managing encrypted secrets in NixOS using sops-nix.</summary>
     </entry>
     <entry>
         <title>Using SOPS to Encrypt Nix Values</title>
-        <link href="https://test.0pt.de5.net/posts/nixos-using-sops-to-encrypt-nix-values"/>
-        <id>https://test.0pt.de5.net/posts/nixos-using-sops-to-encrypt-nix-values</id>
+        <link href="https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values"/>
+        <id>https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values</id>
         <updated>2025-10-17T00:00:00Z</updated>
         <summary>How to encrypt sensitive values in your Nix code using SOPS.</summary>
     </entry>
     <entry>
         <title>A770的AI使用体验</title>
-        <link href="https://test.0pt.de5.net/posts/hardware-a770-test"/>
-        <id>https://test.0pt.de5.net/posts/hardware-a770-test</id>
+        <link href="https://blog.0pt.icu/posts/hardware-a770-test"/>
+        <id>https://blog.0pt.icu/posts/hardware-a770-test</id>
         <updated>2025-09-26T00:00:00Z</updated>
         <summary>Testing the Intel Arc A770 for AI: The good, the bad, and the reality of using an Intel GPU for OLLAMA and ComfyUI</summary>
     </entry>
     <entry>
         <title>升级cmcc rax3000m emmc路由器,刷入ImmortWrt24.10.2</title>
-        <link href="https://test.0pt.de5.net/posts/router-cmcc-rax3000m-update"/>
-        <id>https://test.0pt.de5.net/posts/router-cmcc-rax3000m-update</id>
+        <link href="https://blog.0pt.icu/posts/router-cmcc-rax3000m-update"/>
+        <id>https://blog.0pt.icu/posts/router-cmcc-rax3000m-update</id>
         <updated>2025-07-23T00:00:00Z</updated>
         <summary>Upgrading the CMCC RAX3000M eMMC variant and installing ImmortalWrt 24.10.2.</summary>
     </entry>
     <entry>
         <title>My NixOS NAS🧊</title>
-        <link href="https://test.0pt.de5.net/posts/homelab-nixos-nas"/>
-        <id>https://test.0pt.de5.net/posts/homelab-nixos-nas</id>
+        <link href="https://blog.0pt.icu/posts/homelab-nixos-nas"/>
+        <id>https://blog.0pt.icu/posts/homelab-nixos-nas</id>
         <updated>2025-03-04T00:00:00Z</updated>
         <summary>Documenting my journey of building a personal NAS using NixOS.</summary>
     </entry>
     <entry>
         <title>Docker/NixOS使用traefik实现简单反代</title>
-        <link href="https://test.0pt.de5.net/posts/server-traefik-simple-guide"/>
-        <id>https://test.0pt.de5.net/posts/server-traefik-simple-guide</id>
+        <link href="https://blog.0pt.icu/posts/server-traefik-simple-guide"/>
+        <id>https://blog.0pt.icu/posts/server-traefik-simple-guide</id>
         <updated>2024-12-20T00:00:00Z</updated>
         <summary>Easy reverse proxy setup with Traefik on Docker and NixOS.</summary>
     </entry>
     <entry>
         <title>使用tebi作为s3,搭建nix缓存服务器</title>
-        <link href="https://test.0pt.de5.net/posts/server-use-tebi-build-nixos-cache-server"/>
-        <id>https://test.0pt.de5.net/posts/server-use-tebi-build-nixos-cache-server</id>
+        <link href="https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server"/>
+        <id>https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server</id>
         <updated>2024-11-12T00:00:00Z</updated>
         <summary>A step-by-step guide on how to set up a high-performance Nix binary cache server using TEBI as an S3-compatible storage backend. Learn how to speed up your Nix builds and reduce bandwidth costs by self-hosting your cache.</summary>
     </entry>
     <entry>
         <title>k3s部署rancher</title>
-        <link href="https://test.0pt.de5.net/posts/k3s-develop-rancher"/>
-        <id>https://test.0pt.de5.net/posts/k3s-develop-rancher</id>
+        <link href="https://blog.0pt.icu/posts/k3s-develop-rancher"/>
+        <id>https://blog.0pt.icu/posts/k3s-develop-rancher</id>
         <updated>2024-11-11T00:00:00Z</updated>
         <summary>A quick guide to deploying Rancher on k3s.</summary>
     </entry>
     <entry>
         <title>k3s部署kubevirt-manager</title>
-        <link href="https://test.0pt.de5.net/posts/k3s-kubevirt-manager"/>
-        <id>https://test.0pt.de5.net/posts/k3s-kubevirt-manager</id>
+        <link href="https://blog.0pt.icu/posts/k3s-kubevirt-manager"/>
+        <id>https://blog.0pt.icu/posts/k3s-kubevirt-manager</id>
         <updated>2024-11-08T00:00:00Z</updated>
         <summary>A quick guide to deploying kubevirt-manager on k3s.</summary>
     </entry>
     <entry>
         <title>cloudfront配置服务器cdn并使用acme.sh自动获取证书</title>
-        <link href="https://test.0pt.de5.net/posts/server-cloudfront-cdn-acme"/>
-        <id>https://test.0pt.de5.net/posts/server-cloudfront-cdn-acme</id>
+        <link href="https://blog.0pt.icu/posts/server-cloudfront-cdn-acme"/>
+        <id>https://blog.0pt.icu/posts/server-cloudfront-cdn-acme</id>
         <updated>2024-02-26T00:00:00Z</updated>
         <summary>Configuring CloudFront CDN with automatic SSL certificates via acme.sh</summary>
     </entry>
     <entry>
         <title>搭建泰拉瑞亚Tshock服务器(强制开荒)</title>
-        <link href="https://test.0pt.de5.net/posts/server-build-terraria-tshock"/>
-        <id>https://test.0pt.de5.net/posts/server-build-terraria-tshock</id>
+        <link href="https://blog.0pt.icu/posts/server-build-terraria-tshock"/>
+        <id>https://blog.0pt.icu/posts/server-build-terraria-tshock</id>
         <updated>2023-11-24T00:00:00Z</updated>
         <summary>Setting up a TShock server for Terraria with a &apos;no imported items&apos; rule to ensure a true fresh start.</summary>
     </entry>

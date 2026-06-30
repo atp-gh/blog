@@ -6,32 +6,32 @@ This file is a curated Markdown map of the site for large language models. Use t
 
 ## Core
 
-- [Home](https://test.0pt.de5.net/) Homepage and primary site entry point.
-- [Posts](https://test.0pt.de5.net/posts) Blog post index.
-- [Projects](https://test.0pt.de5.net/projects) Project showcase index.
-- [Links](https://test.0pt.de5.net/links) Friend links and external resources.
-- [Tags](https://test.0pt.de5.net/tags) Tag index.
-- [Sitemap](https://test.0pt.de5.net/sitemap.xml) XML sitemap for crawlable pages.
+- [Home](https://blog.0pt.icu/) Homepage and primary site entry point.
+- [Posts](https://blog.0pt.icu/posts) Blog post index.
+- [Projects](https://blog.0pt.icu/projects) Project showcase index.
+- [Links](https://blog.0pt.icu/links) Friend links and external resources.
+- [Tags](https://blog.0pt.icu/tags) Tag index.
+- [Sitemap](https://blog.0pt.icu/sitemap.xml) XML sitemap for crawlable pages.
 
 ## Posts
 
-- [My NixOS NAS🧊 (2)](https://test.0pt.de5.net/posts/homelab-nixos-nas-2) Documenting my journey of building a personal NAS using NixOS.
-- [Sops-nix Quick Start Guide](https://test.0pt.de5.net/posts/nixos-sops-nix-quick-start-guide) A quick guide to managing encrypted secrets in NixOS using sops-nix.
-- [Using SOPS to Encrypt Nix Values](https://test.0pt.de5.net/posts/nixos-using-sops-to-encrypt-nix-values) How to encrypt sensitive values in your Nix code using SOPS.
-- [A770的AI使用体验](https://test.0pt.de5.net/posts/hardware-a770-test) Testing the Intel Arc A770 for AI: The good, the bad, and the reality of using an Intel GPU for OLLAMA and ComfyUI
-- [升级cmcc rax3000m emmc路由器,刷入ImmortWrt24.10.2](https://test.0pt.de5.net/posts/router-cmcc-rax3000m-update) Upgrading the CMCC RAX3000M eMMC variant and installing ImmortalWrt 24.10.2.
-- [My NixOS NAS🧊](https://test.0pt.de5.net/posts/homelab-nixos-nas) Documenting my journey of building a personal NAS using NixOS.
-- [Docker/NixOS使用traefik实现简单反代](https://test.0pt.de5.net/posts/server-traefik-simple-guide) Easy reverse proxy setup with Traefik on Docker and NixOS.
-- [使用tebi作为s3,搭建nix缓存服务器](https://test.0pt.de5.net/posts/server-use-tebi-build-nixos-cache-server) A step-by-step guide on how to set up a high-performance Nix binary cache server using TEBI as an S3-compatible storage backend. Learn how to speed up your Nix builds and reduce bandwidth costs by self-hosting your cache.
-- [k3s部署rancher](https://test.0pt.de5.net/posts/k3s-develop-rancher) A quick guide to deploying Rancher on k3s.
-- [k3s部署kubevirt-manager](https://test.0pt.de5.net/posts/k3s-kubevirt-manager) A quick guide to deploying kubevirt-manager on k3s.
-- [cloudfront配置服务器cdn并使用acme.sh自动获取证书](https://test.0pt.de5.net/posts/server-cloudfront-cdn-acme) Configuring CloudFront CDN with automatic SSL certificates via acme.sh
-- [搭建泰拉瑞亚Tshock服务器(强制开荒)](https://test.0pt.de5.net/posts/server-build-terraria-tshock) Setting up a TShock server for Terraria with a 'no imported items' rule to ensure a true fresh start.
+- [My NixOS NAS🧊 (2)](https://blog.0pt.icu/posts/homelab-nixos-nas-2) Documenting my journey of building a personal NAS using NixOS.
+- [Sops-nix Quick Start Guide](https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide) A quick guide to managing encrypted secrets in NixOS using sops-nix.
+- [Using SOPS to Encrypt Nix Values](https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values) How to encrypt sensitive values in your Nix code using SOPS.
+- [A770的AI使用体验](https://blog.0pt.icu/posts/hardware-a770-test) Testing the Intel Arc A770 for AI: The good, the bad, and the reality of using an Intel GPU for OLLAMA and ComfyUI
+- [升级cmcc rax3000m emmc路由器,刷入ImmortWrt24.10.2](https://blog.0pt.icu/posts/router-cmcc-rax3000m-update) Upgrading the CMCC RAX3000M eMMC variant and installing ImmortalWrt 24.10.2.
+- [My NixOS NAS🧊](https://blog.0pt.icu/posts/homelab-nixos-nas) Documenting my journey of building a personal NAS using NixOS.
+- [Docker/NixOS使用traefik实现简单反代](https://blog.0pt.icu/posts/server-traefik-simple-guide) Easy reverse proxy setup with Traefik on Docker and NixOS.
+- [使用tebi作为s3,搭建nix缓存服务器](https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server) A step-by-step guide on how to set up a high-performance Nix binary cache server using TEBI as an S3-compatible storage backend. Learn how to speed up your Nix builds and reduce bandwidth costs by self-hosting your cache.
+- [k3s部署rancher](https://blog.0pt.icu/posts/k3s-develop-rancher) A quick guide to deploying Rancher on k3s.
+- [k3s部署kubevirt-manager](https://blog.0pt.icu/posts/k3s-kubevirt-manager) A quick guide to deploying kubevirt-manager on k3s.
+- [cloudfront配置服务器cdn并使用acme.sh自动获取证书](https://blog.0pt.icu/posts/server-cloudfront-cdn-acme) Configuring CloudFront CDN with automatic SSL certificates via acme.sh
+- [搭建泰拉瑞亚Tshock服务器(强制开荒)](https://blog.0pt.icu/posts/server-build-terraria-tshock) Setting up a TShock server for Terraria with a 'no imported items' rule to ensure a true fresh start.
 
 ## Pages
 
-- [About](https://test.0pt.de5.net/about) Standalone page.
-- [](https://test.0pt.de5.net/home) Standalone page.
+- [About](https://blog.0pt.icu/about) Standalone page.
+- [](https://blog.0pt.icu/home) Standalone page.
 
 ## External Links
 

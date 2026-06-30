@@ -121,7 +121,7 @@ pub type Config {
 /// This prevents drift between `base_path`, feed URLs, sitemap URLs, robots.txt,
 /// llms.txt, the SPA shell, and runtime content metadata.
 pub fn site_meta() -> SiteMeta {
-  let base_url = canonical_base_url("https://test.0pt.de5.net")
+  let base_url = canonical_base_url("https://blog.0pt.icu")
 
   SiteMeta(
     base_url: base_url,
@@ -177,7 +177,7 @@ pub fn default() -> Config {
     search_enabled: True,
     navbar_fixed: True,
     analytics: site.Umami(
-      website_id: "a01375ed-18f4-4098-95dc-4d7c4476435b",
+      website_id: "db91a9df-01cd-4d4c-9a58-46f63001928d",
       src: "https://umami.0pt.dpdns.org/login.js",
     ),
     mathjax_enabled: False,

@@ -1,60 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://test.0pt.de5.net</loc>
+        <loc>https://blog.0pt.icu</loc>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/homelab-nixos-nas-2</loc>
+      <loc>https://blog.0pt.icu/posts/homelab-nixos-nas-2</loc>
         <lastmod>2025-10-17</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/nixos-sops-nix-quick-start-guide</loc>
+      <loc>https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide</loc>
         <lastmod>2025-10-17</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/nixos-using-sops-to-encrypt-nix-values</loc>
+      <loc>https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values</loc>
         <lastmod>2025-10-17</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/hardware-a770-test</loc>
+      <loc>https://blog.0pt.icu/posts/hardware-a770-test</loc>
         <lastmod>2025-09-26</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/router-cmcc-rax3000m-update</loc>
+      <loc>https://blog.0pt.icu/posts/router-cmcc-rax3000m-update</loc>
         <lastmod>2025-07-23</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/homelab-nixos-nas</loc>
+      <loc>https://blog.0pt.icu/posts/homelab-nixos-nas</loc>
         <lastmod>2025-03-04</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/server-traefik-simple-guide</loc>
+      <loc>https://blog.0pt.icu/posts/server-traefik-simple-guide</loc>
         <lastmod>2024-12-20</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/server-use-tebi-build-nixos-cache-server</loc>
+      <loc>https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server</loc>
         <lastmod>2024-11-12</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/k3s-develop-rancher</loc>
+      <loc>https://blog.0pt.icu/posts/k3s-develop-rancher</loc>
         <lastmod>2024-11-11</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/k3s-kubevirt-manager</loc>
+      <loc>https://blog.0pt.icu/posts/k3s-kubevirt-manager</loc>
         <lastmod>2024-11-08</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/server-cloudfront-cdn-acme</loc>
+      <loc>https://blog.0pt.icu/posts/server-cloudfront-cdn-acme</loc>
         <lastmod>2024-02-26</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/posts/server-build-terraria-tshock</loc>
+      <loc>https://blog.0pt.icu/posts/server-build-terraria-tshock</loc>
         <lastmod>2023-11-24</lastmod>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/about</loc>
+      <loc>https://blog.0pt.icu/about</loc>
     </url>
     <url>
-      <loc>https://test.0pt.de5.net/home</loc>
+      <loc>https://blog.0pt.icu/home</loc>
     </url>
 </urlset>
