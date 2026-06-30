@@ -1,6 +1,5 @@
 .direnv/
 
-dist/
 *.beam
 *.ez
 /build
