@@ -11,16 +11,36 @@
 //// The FFI lives in `src/ffi/analytics.ffi.mjs`. The `@external` declaration
 //// has a no-op Gleam fallback so the project builds on Erlang.
 
-import data/site.{type Analytics}
-import lustre/effect.{type Effect}
+import data/site
+import lustre/effect
 
 /// Inject the analytics script for the configured provider. No-op when
-/// `analytics` is `Disabled`.
-pub fn inject(analytics: Analytics) -> Effect(Nil) {
+/// `analytics` is `AnalyticsDisabled`.
+pub fn inject(analytics: site.Analytics) -> effect.Effect(Nil) {
   use _ <- effect.from
-  inject_analytics(analytics)
-  Nil
+
+  case analytics {
+    site.AnalyticsDisabled -> Nil
+
+    site.Umami(src, website_id) -> {
+      inject_umami(website_id: website_id, src: src)
+
+      Nil
+    }
+
+    site.GoatCounter(data_goatcounter, src) -> {
+      inject_goatcounter(data_goatcounter: data_goatcounter, src: src)
+
+      Nil
+    }
+  }
 }
 
-@external(javascript, "../ffi/analytics.ffi.mjs", "inject_analytics")
-fn inject_analytics(analytics: Analytics) -> Nil
+@external(javascript, "../ffi/analytics.ffi.mjs", "inject_umami")
+fn inject_umami(website_id website_id: String, src src: String) -> Nil
+
+@external(javascript, "../ffi/analytics.ffi.mjs", "inject_goatcounter")
+fn inject_goatcounter(
+  data_goatcounter data_goatcounter: String,
+  src src: String,
+) -> Nil

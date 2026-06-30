@@ -8,34 +8,34 @@
 //   - GoatCounter: loads the vendored count.js with data-goatcounter.
 //   - Umami: loads the vendored imamu.js with data-website-id.
 
-export function inject_analytics(provider) {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  if (document.getElementById("arata-analytics")) return;
+function analytics_already_injected() {
+  return document.getElementById("arata-analytics") !== null;
+}
 
-  switch (provider.kind) {
-    case "goatcounter": {
-      const script = document.createElement("script");
-      script.id = "arata-analytics";
-      script.src = "/js/count.js";
-      script.async = true;
-      script.setAttribute(
-        "data-goatcounter",
-        "https://" + provider.user + "." + (provider.host || "goatcounter.com") + "/count",
-      );
-      document.head.appendChild(script);
-      break;
-    }
-    case "umami": {
-      const script = document.createElement("script");
-      script.id = "arata-analytics";
-      script.src = "/js/imamu.js";
-      script.async = true;
-      script.setAttribute("data-website-id", provider.website_id);
-      script.setAttribute("data-host-url", provider.host_url);
-      document.head.appendChild(script);
-      break;
-    }
-    default:
-      break;
-  }
+export function inject_umami(website_id, src) {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  if (analytics_already_injected()) return;
+  if (!src || !website_id) return;
+
+  const script = document.createElement("script");
+  script.defer = true;
+  script.id = "arata-analytics";
+  script.src = src;
+  script.setAttribute("data-website-id", website_id);
+
+  document.head.appendChild(script);
+}
+
+export function inject_goatcounter(data_goatcounter, src) {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  if (analytics_already_injected()) return;
+  if (!src || !data_goatcounter) return;
+
+  const script = document.createElement("script");
+  script.id = "arata-analytics";
+  script.setAttribute("data-goatcounter", data_goatcounter);
+  script.async = true;
+  script.src = src;
+
+  document.head.appendChild(script);
 }
