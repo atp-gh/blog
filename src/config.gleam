@@ -161,7 +161,7 @@ pub fn default() -> Config {
     // base URL prefix instead of relying on a relative path.
     socials: default_socials(rss_enabled),
     logo: None,
-    favicon: Some("images/arata-logo.avif"),
+    favicon: Some("images/favicon.ico"),
     rss_enabled:,
     fonts: Fonts(
       text: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif",
@@ -180,13 +180,13 @@ pub fn default() -> Config {
       website_id: "db91a9df-01cd-4d4c-9a58-46f63001928d",
       host_url: "https://umami.0pt.dpdns.org",
     ),
-    mathjax_enabled: True,
+    mathjax_enabled: False,
     sidebar_enabled: True,
     floating_buttons_enabled: True,
     aratafetch_enabled: True,
     aratafetch_maintained_for: Some("since 2023-07-15"),
     lightbox_enabled: True,
-    latest_posts_enabled: False,
+    latest_posts_enabled: True,
     latest_posts_count: 5,
   )
 }
